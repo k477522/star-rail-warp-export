@@ -475,6 +475,11 @@
       "item_type": "光锥",
       "rank_type": "4"
     },
+    "22007": {
+      "name": "未来，有我们一起",
+      "item_type": "光锥",
+      "rank_type": "4"
+    },
     "23000": {
       "name": "银河铁道之夜",
       "item_type": "光锥",
@@ -752,6 +757,16 @@
     },
     "23056": {
       "name": "一场谎言的终幕",
+      "item_type": "光锥",
+      "rank_type": "5"
+    },
+    "23057": {
+      "name": "欢迎来到银河城",
+      "item_type": "光锥",
+      "rank_type": "5"
+    },
+    "23058": {
+      "name": "邂逅于下一个花季",
       "item_type": "光锥",
       "rank_type": "5"
     },
@@ -1185,6 +1200,16 @@
       "item_type": "角色",
       "rank_type": "5"
     },
+    "1505": {
+      "name": "绯英",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "1506": {
+      "name": "银狼LV.<unbreak>999</unbreak>",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
     "8001": {
       "name": "{NICKNAME}",
       "item_type": "角色",
@@ -1221,6 +1246,16 @@
       "rank_type": "5"
     },
     "8008": {
+      "name": "{NICKNAME}",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "8009": {
+      "name": "{NICKNAME}",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "8010": {
       "name": "{NICKNAME}",
       "item_type": "角色",
       "rank_type": "5"
@@ -1702,6 +1737,11 @@
       "item_type": "光錐",
       "rank_type": "4"
     },
+    "22007": {
+      "name": "未來，有我們一起",
+      "item_type": "光錐",
+      "rank_type": "4"
+    },
     "23000": {
       "name": "銀河鐵道之夜",
       "item_type": "光錐",
@@ -1979,6 +2019,16 @@
     },
     "23056": {
       "name": "一場謊言的終幕",
+      "item_type": "光錐",
+      "rank_type": "5"
+    },
+    "23057": {
+      "name": "歡迎來到銀河城",
+      "item_type": "光錐",
+      "rank_type": "5"
+    },
+    "23058": {
+      "name": "邂逅於下一個花季",
       "item_type": "光錐",
       "rank_type": "5"
     },
@@ -2412,6 +2462,16 @@
       "item_type": "角色",
       "rank_type": "5"
     },
+    "1505": {
+      "name": "緋英",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "1506": {
+      "name": "銀狼LV.<unbreak>999</unbreak>",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
     "8001": {
       "name": "{NICKNAME}",
       "item_type": "角色",
@@ -2448,6 +2508,16 @@
       "rank_type": "5"
     },
     "8008": {
+      "name": "{NICKNAME}",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "8009": {
+      "name": "{NICKNAME}",
+      "item_type": "角色",
+      "rank_type": "5"
+    },
+    "8010": {
       "name": "{NICKNAME}",
       "item_type": "角色",
       "rank_type": "5"
@@ -2929,6 +2999,11 @@
       "item_type": "Light Cone",
       "rank_type": "4"
     },
+    "22007": {
+      "name": "Tomorrow, Together",
+      "item_type": "Light Cone",
+      "rank_type": "4"
+    },
     "23000": {
       "name": "Night on the Milky Way",
       "item_type": "Light Cone",
@@ -3206,6 +3281,16 @@
     },
     "23056": {
       "name": "The Finale of a Lie",
+      "item_type": "Light Cone",
+      "rank_type": "5"
+    },
+    "23057": {
+      "name": "Welcome to the Cosmic City",
+      "item_type": "Light Cone",
+      "rank_type": "5"
+    },
+    "23058": {
+      "name": "Until the Flowers Bloom Again",
       "item_type": "Light Cone",
       "rank_type": "5"
     },
@@ -3639,6 +3724,16 @@
       "item_type": "Character",
       "rank_type": "5"
     },
+    "1505": {
+      "name": "Evanescia",
+      "item_type": "Character",
+      "rank_type": "5"
+    },
+    "1506": {
+      "name": "Silver Wolf LV.<unbreak>999</unbreak>",
+      "item_type": "Character",
+      "rank_type": "5"
+    },
     "8001": {
       "name": "{NICKNAME}",
       "item_type": "Character",
@@ -3675,6 +3770,16 @@
       "rank_type": "5"
     },
     "8008": {
+      "name": "{NICKNAME}",
+      "item_type": "Character",
+      "rank_type": "5"
+    },
+    "8009": {
+      "name": "{NICKNAME}",
+      "item_type": "Character",
+      "rank_type": "5"
+    },
+    "8010": {
       "name": "{NICKNAME}",
       "item_type": "Character",
       "rank_type": "5"
@@ -4156,6 +4261,11 @@
       "item_type": "光円錐",
       "rank_type": "4"
     },
+    "22007": {
+      "name": "みんなで{RUBY_B#いっしょ}一緒{RUBY_E#}に{RUBY_B#みらい}未来{RUBY_E#}へ",
+      "item_type": "光円錐",
+      "rank_type": "4"
+    },
     "23000": {
       "name": "{RUBY_B#ぎんがてつどう}銀河鉄道{RUBY_E#}の{RUBY_B#よる}夜{RUBY_E#}",
       "item_type": "光円錐",
@@ -4433,6 +4543,16 @@
     },
     "23056": {
       "name": "{RUBY_B#あ}或{RUBY_E#}る{RUBY_B#うそ}嘘{RUBY_E#}の{RUBY_B#しゅうまく}終幕{RUBY_E#}",
+      "item_type": "光円錐",
+      "rank_type": "5"
+    },
+    "23057": {
+      "name": "{RUBY_B#ぎんが}銀河{RUBY_E#}シティへようこそ",
+      "item_type": "光円錐",
+      "rank_type": "5"
+    },
+    "23058": {
+      "name": "{RUBY_B#ふたた}再{RUBY_E#}び{RUBY_B#はな}花{RUBY_E#}が{RUBY_B#さ}咲{RUBY_E#}く{RUBY_B#きせつ}季節{RUBY_E#}に",
       "item_type": "光円錐",
       "rank_type": "5"
     },
@@ -4866,6 +4986,16 @@
       "item_type": "キャラ",
       "rank_type": "5"
     },
+    "1505": {
+      "name": "{RUBY_B#ひえい}緋英{RUBY_E#}",
+      "item_type": "キャラ",
+      "rank_type": "5"
+    },
+    "1506": {
+      "name": "{RUBY_B#ぎんろう}銀狼{RUBY_E#}LV.<unbreak>999</unbreak>",
+      "item_type": "キャラ",
+      "rank_type": "5"
+    },
     "8001": {
       "name": "{NICKNAME}",
       "item_type": "キャラ",
@@ -4902,6 +5032,16 @@
       "rank_type": "5"
     },
     "8008": {
+      "name": "{NICKNAME}",
+      "item_type": "キャラ",
+      "rank_type": "5"
+    },
+    "8009": {
+      "name": "{NICKNAME}",
+      "item_type": "キャラ",
+      "rank_type": "5"
+    },
+    "8010": {
       "name": "{NICKNAME}",
       "item_type": "キャラ",
       "rank_type": "5"
@@ -5383,6 +5523,11 @@
       "item_type": "무기",
       "rank_type": "4"
     },
+    "22007": {
+      "name": "미래엔 우리가 함께할 거야",
+      "item_type": "무기",
+      "rank_type": "4"
+    },
     "23000": {
       "name": "은하철도의 밤",
       "item_type": "무기",
@@ -5660,6 +5805,16 @@
     },
     "23056": {
       "name": "거짓말의 종막",
+      "item_type": "무기",
+      "rank_type": "5"
+    },
+    "23057": {
+      "name": "갤럭시 시티에 오신 것을 환영합니다",
+      "item_type": "무기",
+      "rank_type": "5"
+    },
+    "23058": {
+      "name": "다음 꽃피는 계절의 만남",
       "item_type": "무기",
       "rank_type": "5"
     },
@@ -6093,6 +6248,16 @@
       "item_type": "캐릭터",
       "rank_type": "5"
     },
+    "1505": {
+      "name": "에바네시아",
+      "item_type": "캐릭터",
+      "rank_type": "5"
+    },
+    "1506": {
+      "name": "은랑 LV.<unbreak>999</unbreak>",
+      "item_type": "캐릭터",
+      "rank_type": "5"
+    },
     "8001": {
       "name": "{NICKNAME}",
       "item_type": "캐릭터",
@@ -6132,7 +6297,17 @@
       "name": "{NICKNAME}",
       "item_type": "캐릭터",
       "rank_type": "5"
+    },
+    "8009": {
+      "name": "{NICKNAME}",
+      "item_type": "캐릭터",
+      "rank_type": "5"
+    },
+    "8010": {
+      "name": "{NICKNAME}",
+      "item_type": "캐릭터",
+      "rank_type": "5"
     }
   },
-  "version": "4.1"
+  "version": "4.2"
 }
