@@ -1,29 +1,46 @@
 <template>
   <p class="text-gray-500 text-sm mb-2 text-center whitespace-nowrap">
     <span class="mx-2" :title="new Date(detail.date[0]).toLocaleString()">{{new Date(detail.date[0]).toLocaleDateString()}}</span>
-    -
+    <span class="text-gray-300">—</span>
     <span class="mx-2" :title="new Date(detail.date[1]).toLocaleString()">{{new Date(detail.date[1]).toLocaleDateString()}}</span>
   </p>
-  <p class="text-gray-600 text-sm mb-1.5">
-    <span class="mr-1">{{text.total}}
-      <span class="text-blue-600 font-medium">{{detail.total}}</span> {{text.times}}
+
+  <div class="flex items-baseline justify-between mb-2 px-1">
+    <span class="text-gray-600 text-sm">
+      {{text.total}} <span class="text-violet-600 font-bold text-base tabular-nums">{{detail.total}}</span> {{text.times}}
     </span>
-    <span v-if="type !== '100'">{{text.sum}}<span class="mx-1 text-green-600 font-medium">{{detail.countMio}}</span>{{text.no5star}}</span>
-  </p>
-  <p class="text-gray-600 text-sm mb-1.5">
-    <span :title="`${text.character}${colon}${detail.count5c}\n${text.weapon}${colon}${detail.count5w}`" class="mr-3 whitespace-pre cursor-help text-yellow-500">
-      <span class="min-w-12 inline-block">{{text.star5}}{{colon}}{{detail.count5}}</span>
-      [{{percent(detail.count5, detail.total)}}]
+    <span v-if="type !== '100'" class="text-gray-500 text-xs">
+      {{text.sum}}<span class="mx-1 text-emerald-600 font-bold tabular-nums">{{detail.countMio}}</span>{{text.no5star}}
     </span>
-    <br><span :title="`${text.character}${colon}${detail.count4c}\n${text.weapon}${colon}${detail.count4w}`" class="mr-3 whitespace-pre cursor-help text-purple-600">
-      <span class="min-w-12 inline-block">{{text.star4}}{{colon}}{{detail.count4}}</span>
-      [{{percent(detail.count4, detail.total)}}]
-    </span>
-    <br><span class="text-blue-500 whitespace-pre">
-      <span class="min-w-12 inline-block">{{text.star3}}{{colon}}{{detail.count3}}</span>
-      [{{percent(detail.count3, detail.total)}}]
-    </span>
-  </p>
+  </div>
+
+  <div class="mb-3">
+    <div class="flex h-5 rounded-md overflow-hidden border border-gray-200 shadow-sm">
+      <div v-if="detail.count5"
+           class="bg-yellow-400 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           :style="`width:${barPct(detail.count5, detail.total)}%`"
+           :title="`${text.star5}${colon}${detail.count5}（${text.character}${colon}${detail.count5c}、${text.weapon}${colon}${detail.count5w}）`">
+        <span v-if="barPct(detail.count5, detail.total) >= 4">{{ detail.count5 }}</span>
+      </div>
+      <div v-if="detail.count4"
+           class="bg-purple-500 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           :style="`width:${barPct(detail.count4, detail.total)}%`"
+           :title="`${text.star4}${colon}${detail.count4}（${text.character}${colon}${detail.count4c}、${text.weapon}${colon}${detail.count4w}）`">
+        {{ detail.count4 }}
+      </div>
+      <div v-if="detail.count3"
+           class="bg-blue-400 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           :style="`width:${barPct(detail.count3, detail.total)}%`"
+           :title="`${text.star3}${colon}${detail.count3}`">
+        {{ detail.count3 }}
+      </div>
+    </div>
+    <div class="flex justify-between text-[11px] text-gray-500 mt-1 px-0.5">
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-yellow-400"></span>{{text.star5}} {{percent(detail.count5, detail.total)}}</span>
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-purple-500"></span>{{text.star4}} {{percent(detail.count4, detail.total)}}</span>
+      <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-400"></span>{{text.star3}} {{percent(detail.count3, detail.total)}}</span>
+    </div>
+  </div>
 
   <div v-if="detail.ssrPos.length" class="mt-2">
     <div class="flex items-center justify-between mb-2">
@@ -75,7 +92,13 @@ const avg5 = (list) => {
 }
 
 const percent = (num, total) => {
+  if (!total) return '0%'
   return `${Math.round(num / total * 10000) / 100}%`
+}
+
+const barPct = (num, total) => {
+  if (!total) return 0
+  return (num / total) * 100
 }
 
 const pityLimits = (bannerKey) => {

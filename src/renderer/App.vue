@@ -23,8 +23,8 @@
           <el-button @click="relaunch()" type="success" icon="refresh"   class="focus:outline-none" style="margin-left: 48px">{{ui.button.directUpdate}}</el-button>
         </el-tooltip>
       </div>
-      <div class="flex gap-2">
-        <el-select v-if="state.status !== 'loading' && dataMap && (dataMap.size > 1 || (dataMap.size === 1 && state.current === 0))" class="!w-44"   @change="changeCurrent" v-model="uidSelectText">
+      <div class="flex items-center gap-4">
+        <el-select v-if="state.status !== 'loading' && dataMap && (dataMap.size > 1 || (dataMap.size === 1 && state.current === 0))" class="!w-44" @change="changeCurrent" v-model="uidSelectText">
           <el-option
             v-for="item of dataMap"
             :key="item[0]"
@@ -33,7 +33,7 @@
           </el-option>
         </el-select>
         <el-dropdown @command="optionCommand">
-          <el-button @click="showSetting(true)" class="focus:outline-none" plain type="info" icon="more"  >{{ui.button.option}}</el-button>
+          <el-button @click="showSetting(true)" class="focus:outline-none" plain type="info" icon="more">{{ui.button.option}}</el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="setting" icon="setting">{{ui.button.setting}}</el-dropdown-item>
@@ -45,7 +45,26 @@
         </el-dropdown>
       </div>
     </div>
-    <p class="text-gray-400 my-2 text-xs">{{hint}}<el-button @click="(state.showCacheCleanDlg=true)" v-if="state.authkeyTimeout" style="margin-left: 8px;" size="small" plain round>{{ui.button.solution}}</el-button></p>
+    <div class="my-3 flex items-center gap-2 text-xs flex-wrap">
+      <span v-if="state.status === 'loaded'" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        {{hint}}
+      </span>
+      <span v-else-if="state.status === 'loading'" class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+        {{hint}}
+      </span>
+      <span v-else-if="state.status === 'updated'" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+        {{hint}}
+      </span>
+      <span v-else-if="state.status === 'failed'" class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+        {{hint}}
+      </span>
+      <span v-else class="text-gray-400 px-2.5 py-1">{{hint}}</span>
+      <el-button @click="(state.showCacheCleanDlg=true)" v-if="state.authkeyTimeout" size="small" plain round>{{ui.button.solution}}</el-button>
+    </div>
     <div v-if="detail" class="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-screen-xl mx-auto">
       <div class="mb-4" v-for="(item, i) of detail" :key="i">
         <div :class="{hidden: state.config.hideNovice && item[0] === '2'}">
@@ -56,6 +75,7 @@
       </div>
     </div>
     <luck-stats v-if="detail" :detail="detail" :typeMap="typeMap"></luck-stats>
+    <timeline-chart v-if="detail" :gachaData="gachaData"></timeline-chart>
     <character-list v-if="detail" :detail="detail" :typeMap="typeMap"></character-list>
     <Setting v-show="state.showSetting" :i18n="state.i18n" :gacha-data-info="dataInfo" @refreshData="readData()" @changeLang="getI18nData()" @close="showSetting(false)"></Setting>
 
@@ -93,6 +113,7 @@ import GachaDetail from './components/GachaDetail.vue'
 import Setting from './components/Setting.vue'
 import LuckStats from './components/LuckStats.vue'
 import CharacterList from './components/CharacterList.vue'
+import TimelineChart from './components/TimelineChart.vue'
 import gachaDetail from './gachaDetail'
 import { version } from '../../package.json'
 import gachaType from '../gachaType.json'

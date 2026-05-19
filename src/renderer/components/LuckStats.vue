@@ -1,5 +1,11 @@
 <template>
-  <div v-if="hasData" class="mt-4 p-5 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 shadow-sm">
+  <div v-if="hasData" class="mt-4 p-5 bg-white rounded-xl border border-gray-200 shadow-sm border-t-4 border-t-violet-400">
+    <div class="flex items-baseline justify-between mb-4 pb-3 border-b border-gray-100">
+      <h3 class="text-base font-semibold text-violet-700 flex items-center gap-1.5">
+        <span>🎲</span>幸運度分析
+      </h3>
+      <span class="text-gray-400 text-xs">基於 5★ pity 與 50/50 紀錄</span>
+    </div>
 
     <!-- Header: tier badge + summary -->
     <div class="flex items-center gap-4 mb-4">
@@ -11,7 +17,8 @@
         <div class="text-gray-700 text-sm">
           <template v-if="totalSSR >= 3">
             均限定 <span class="font-bold text-gray-900 text-base">{{ overallEffective }}</span> 抽
-            <span class="text-gray-400 text-xs ml-2">（理論期望 ~93 抽）</span>
+            <span class="text-gray-400 text-xs ml-2">（理論期望 ~{{ theoreticalExpected }} 抽）</span>
+            <span v-if="totalSSR < 10" class="text-amber-600 text-xs ml-2">⚠ 樣本少（N={{ totalSSR }}），僅供參考</span>
           </template>
           <template v-else>
             樣本不足（需至少 3 個五星）
@@ -171,12 +178,44 @@
             <span class="text-lg font-bold text-gray-800 tabular-nums">{{ row.pulls }}</span>
             <span class="text-gray-400 text-[10px]">抽</span>
           </div>
+          <div class="text-gray-400 text-[10px] tabular-nums">({{ row.low }}–{{ row.high }})</div>
           <div class="text-gray-400 text-[10px] tabular-nums">{{ formatNum(row.pulls * 160) }} 星瓊</div>
         </div>
       </div>
       <p class="text-gray-400 text-[10px] mt-3 leading-tight">
-        * 推估值假設你維持目前的中獎率與均抽 pity；實際存在隨機性。
+        * 點估計假設你維持目前的中獎率與均抽 pity；括號內為 ±15% 經驗區間，實際因隨機性可能更寬。
       </p>
+    </div>
+
+    <!-- 極值紀錄 -->
+    <div v-if="extremes" class="border-t border-gray-200 pt-4 mt-4">
+      <p class="text-gray-500 text-xs mb-2">極值紀錄</p>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+          <div class="text-emerald-600 text-[11px]">🎉 最歐 5★</div>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-xl font-bold text-emerald-700 tabular-nums">{{ extremes.luckiest.pity }}</span>
+            <span class="text-gray-400 text-[10px]">抽</span>
+          </div>
+          <div class="text-gray-500 text-[11px] truncate" :title="extremes.luckiest.name">{{ extremes.luckiest.name }}</div>
+        </div>
+        <div class="bg-rose-50 border border-rose-200 rounded-lg p-2.5">
+          <div class="text-rose-600 text-[11px]">😭 最慘 5★</div>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-xl font-bold text-rose-700 tabular-nums">{{ extremes.worst.pity }}</span>
+            <span class="text-gray-400 text-[10px]">抽</span>
+          </div>
+          <div class="text-gray-500 text-[11px] truncate" :title="extremes.worst.name">{{ extremes.worst.name }}</div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
+          <div class="text-amber-600 text-[11px]">⏳ 當前最長未出 5★</div>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-xl font-bold text-amber-700 tabular-nums">{{ extremes.currentStreak.pity }}</span>
+            <span class="text-gray-400 text-[10px]">抽</span>
+          </div>
+          <div class="text-gray-500 text-[11px] truncate">{{ extremes.currentStreak.poolName }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -291,6 +330,21 @@ const overallEffective = computed(() => {
   return Math.round(sumPity / sumLimited * 10) / 10
 })
 
+// 各池理論期望（抽 / 限定）：角色 ~93.75（50% × 62.5），光錐 ~86.7（75% × 65）
+const POOL_THEORETICAL = { '11': 93.75, '21': 93.75, '12': 86.7, '22': 86.7 }
+
+const theoreticalExpected = computed(() => {
+  const list = fiftyStats.value
+  if (!list.length) return 93
+  const weighted = list.reduce((acc, s) => {
+    const exp = POOL_THEORETICAL[s.key] ?? 93
+    const n = s.won + s.lost
+    return { sum: acc.sum + exp * n, n: acc.n + n }
+  }, { sum: 0, n: 0 })
+  if (!weighted.n) return 93
+  return Math.round(weighted.sum / weighted.n)
+})
+
 // 命座+光錐 組合：X+Y = X 命角色 + Y 把光錐
 const costPlans = [
   { label: '0+0', desc: '只抽角色',          char: 1, cone: 0 },
@@ -306,12 +360,62 @@ const costEstimate = computed(() => {
   if (!c) return []
   return costPlans
     .filter(p => p.cone === 0 || w)
-    .map(p => ({
-      label: p.label,
-      desc: p.desc,
-      pulls: Math.round(c.effectiveAvg * p.char + (w ? w.effectiveAvg * p.cone : 0)),
-      highlight: p.highlight
-    }))
+    .map(p => {
+      const point = Math.round(c.effectiveAvg * p.char + (w ? w.effectiveAvg * p.cone : 0))
+      const low = Math.round(point * 0.85)
+      const high = Math.round(point * 1.15)
+      return {
+        label: p.label,
+        desc: p.desc,
+        pulls: point,
+        low, high,
+        highlight: p.highlight
+      }
+    })
+})
+
+// 全部 5★（含常駐池）依時間排序，用來找極值
+const allSSRForExtremes = computed(() => {
+  if (!props.detail) return []
+  const all = []
+  for (const [poolKey, d] of props.detail) {
+    if (!d?.ssrPos) continue
+    for (const item of d.ssrPos) {
+      all.push({
+        name: (item[0] || '').replace(/<[^>]+>/g, ''),
+        pity: item[1],
+        time: item[2],
+        poolKey
+      })
+    }
+  }
+  return all
+})
+
+const extremes = computed(() => {
+  const list = allSSRForExtremes.value
+  if (!list.length) return null
+
+  let luckiest = list[0]
+  let worst = list[0]
+  for (const item of list) {
+    if (item.pity < luckiest.pity) luckiest = item
+    if (item.pity > worst.pity) worst = item
+  }
+
+  // 當前最長未出 5★ streak：所有池子裡 countMio 最大的
+  let currentStreak = { pity: 0, poolName: '—' }
+  if (props.detail) {
+    for (const [key, d] of props.detail) {
+      if (!d) continue
+      const p = d.countMio ?? 0
+      if (p > currentStreak.pity) {
+        currentStreak = { pity: p, poolName: props.typeMap?.get(key) || key }
+      }
+    }
+  }
+
+  return { luckiest, worst, currentStreak }
 })
 
 const formatNum = (n) => n.toLocaleString('zh-TW')
