@@ -64,7 +64,10 @@
 
     <!-- Pool pity bars -->
     <div class="mb-5">
-      <p class="text-gray-500 text-xs mb-2">當前保底進度</p>
+      <div class="flex items-baseline justify-between mb-2">
+        <p class="text-gray-500 text-xs">當前保底進度</p>
+        <p class="text-gray-400 text-[10px]">預期值基於軟保底機率推估</p>
+      </div>
       <div class="space-y-2">
         <div v-for="pool of poolList" :key="pool.key" class="flex items-center gap-3 text-xs">
           <span class="text-gray-600 w-24 text-right flex-shrink-0 truncate">{{ pool.name }}</span>
@@ -77,6 +80,10 @@
           </div>
           <span :class="pityTextColor(pool.pity, pool.hardPity)" class="w-14 text-right flex-shrink-0 tabular-nums">
             {{ pool.pity }} / {{ pool.hardPity }}
+          </span>
+          <span class="w-24 text-right flex-shrink-0 text-gray-500 tabular-nums" :title="`離硬保底 ${pool.hardPity - pool.pity} 抽`">
+            <span class="text-gray-400">預期</span>
+            <span :class="pool.inSoftPity ? 'text-orange-500 font-bold' : 'text-gray-700 font-medium'">~{{ pool.expectedNext }}</span> 抽
           </span>
         </div>
       </div>
@@ -176,6 +183,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { STANDARD_5STAR } from '../constants'
 
 const props = defineProps({
   detail: Map,
@@ -187,16 +195,6 @@ const hardPityMap = {
   '12': 80, '22': 80,
   '2': 50
 }
-
-// 常駐池 5★（item_id）：含原始 7 隻 + 已轉常駐的限定（HSR 3.x）
-const STANDARD_5STAR = new Set([
-  // 角色（原始 7）
-  '1003', '1004', '1101', '1104', '1107', '1209', '1211',
-  // 角色（限轉常）
-  '1006', '1102', '1205', '1208', '1221', '1302',
-  // 光錐
-  '23000', '23002', '23003', '23004', '23005', '23012', '23013'
-])
 
 const fiftyConfig = [
   { key: '11', expected: 0.5 },
@@ -428,16 +426,50 @@ const rateArrow = (rate, expected) => {
   return ''
 }
 
+// 軟保底機率模型：未進軟保底前 base rate；進軟保底後線性上升到硬保底時 100%
+const pityModel = (key) => {
+  if (key === '12' || key === '22') return { hard: 80, soft: 65, base: 0.008 }
+  if (key === '2') return { hard: 50, soft: 40, base: 0.006 }
+  return { hard: 90, soft: 74, base: 0.006 }
+}
+
+const probAt = (pullNum, key) => {
+  const { hard, soft, base } = pityModel(key)
+  if (pullNum >= hard) return 1
+  if (pullNum < soft) return base
+  return base + ((pullNum - soft) / (hard - soft)) * (1 - base)
+}
+
+// E[剩餘抽數] | 當前 pity = p
+const expectedRemaining = (currentPity, key) => {
+  const { hard } = pityModel(key)
+  let survival = 1
+  let expected = 0
+  for (let k = 1; k <= hard - currentPity; k++) {
+    const p = probAt(currentPity + k, key)
+    expected += k * survival * p
+    survival *= (1 - p)
+  }
+  return Math.max(1, Math.round(expected * 10) / 10)
+}
+
 const poolList = computed(() => {
   if (!props.detail) return []
   return ['11', '21', '12', '22', '1']
     .filter(key => props.detail.has(key))
-    .map(key => ({
-      key,
-      name: props.typeMap?.get(key) || key,
-      pity: props.detail.get(key).countMio,
-      hardPity: hardPityMap[key] || 90
-    }))
+    .map(key => {
+      const model = pityModel(key)
+      const pity = props.detail.get(key).countMio
+      return {
+        key,
+        name: props.typeMap?.get(key) || key,
+        pity,
+        hardPity: model.hard,
+        softPity: model.soft,
+        inSoftPity: pity >= model.soft,
+        expectedNext: expectedRemaining(pity, key)
+      }
+    })
 })
 
 const barColor = (pity, hardPity) => {

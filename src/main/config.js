@@ -9,7 +9,8 @@ const config = {
   proxyMode: false,
   autoUpdate: true,
   fetchFullHistory: false,
-  hideNovice: false
+  hideNovice: false,
+  externalDataPath: ''
 }
 
 const getLocalConfig = async () => {

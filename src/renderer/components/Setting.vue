@@ -42,6 +42,13 @@
         </el-switch>
         <p class="text-gray-400 text-xs m-1.5">{{text.fetchFullHistoryHint}}</p>
       </el-form-item>
+      <el-form-item :label="text.externalDataPath">
+        <div class="flex gap-2 w-full">
+          <el-input v-model="settingForm.externalDataPath" :placeholder="text.externalDataPathPlaceholder" clearable @change="saveExternalDataPath" class="!w-96"></el-input>
+          <el-button @click="pickExternalDataPath">{{text.browse}}</el-button>
+        </div>
+        <p class="text-gray-400 text-xs m-1.5">{{text.externalDataPathHint}}</p>
+      </el-form-item>
       <el-form-item :label="text.proxyMode">
         <el-switch
           @change="saveSetting"
@@ -109,7 +116,8 @@ const settingForm = reactive({
   proxyMode: true,
   autoUpdate: true,
   fetchFullHistory: false,
-  hideNovice: true
+  hideNovice: true,
+  externalDataPath: ''
 })
 
 const state = reactive({
@@ -125,6 +133,19 @@ const saveSetting = async () => {
   const keys = ['lang', 'logType', 'proxyMode', 'autoUpdate', 'fetchFullHistory', 'hideNovice']
   for (let key of keys) {
     await ipcRenderer.invoke('SAVE_CONFIG', [key, settingForm[key]])
+  }
+}
+
+const saveExternalDataPath = async () => {
+  await ipcRenderer.invoke('SAVE_CONFIG', ['externalDataPath', settingForm.externalDataPath || ''])
+  emit('refreshData')
+}
+
+const pickExternalDataPath = async () => {
+  const folder = await ipcRenderer.invoke('PICK_FOLDER')
+  if (folder) {
+    settingForm.externalDataPath = folder
+    await saveExternalDataPath()
   }
 }
 

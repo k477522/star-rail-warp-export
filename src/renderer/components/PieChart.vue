@@ -56,10 +56,10 @@ const parseData = (detail, type) => {
     });
     color.push(colors[index]);
   });
-  if (
-    type === "100" ||
-    result.findIndex((item) => item.name.includes("5")) === -1
-  ) {
+  const hasHighRank = result.some(
+    (item) => item.name === text.chara5 || item.name === text.weapon5 || item.name === text.chara4 || item.name === text.weapon4
+  );
+  if (!hasHighRank) {
     selected[text.weapon3] = true;
   }
   return [result, color, selected];
@@ -73,12 +73,16 @@ const updateChart = throttle(() => {
 
   const colon = props.i18n.symbol.colon;
   const result = parseData(props.data[1], props.data[0]);
+  const total = result[0].reduce((sum, item) => sum + item.value, 0);
 
   const option = {
     tooltip: {
       trigger: "item",
-      formatter: `{b0}${colon}{c0}`,
-      padding: 4,
+      formatter: (params) => {
+        const pct = total ? ((params.value / total) * 100).toFixed(1) : 0;
+        return `${params.name}${colon}${params.value} (${pct}%)`;
+      },
+      padding: 6,
       textStyle: {
         fontSize: 12,
       },
@@ -87,8 +91,9 @@ const updateChart = throttle(() => {
       top: "2%",
       left: "center",
       selected: result[2],
+      itemGap: 8,
+      textStyle: { fontSize: 11 },
     },
-    selectedMode: "single",
     color: result[1],
     series: [
       {
@@ -96,23 +101,32 @@ const updateChart = throttle(() => {
         type: "pie",
         top: 50,
         startAngle: 70,
-        radius: ["0%", "90%"],
-        // avoidLabelOverlap: false,
+        radius: ["0%", "85%"],
+        avoidLabelOverlap: true,
+        minAngle: 3,
         labelLine: {
-          length: 0,
-          length2: 10,
+          length: 4,
+          length2: 8,
+          smooth: true,
         },
         label: {
+          fontSize: 11,
           overflow: "break",
         },
+        emphasis: {
+          scale: true,
+          scaleSize: 4,
+          label: { fontWeight: "bold" },
+        },
+        animationDuration: 400,
         data: result[0],
       },
     ],
   };
 
-  pieChart.setOption(option);
+  pieChart.setOption(option, { notMerge: true });
   pieChart.resize();
-}, 1000);
+}, 200);
 
 onUpdated(() => {
   updateChart();

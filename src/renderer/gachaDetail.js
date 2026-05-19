@@ -52,7 +52,7 @@ const gachaDetail = (data) => {
           itemCount(detail.char4, name)
         }
       } else if (rank === '5') {
-        detail.ssrPos.push([name, index + 1 - lastSSR, time, key, item_id])
+        detail.ssrPos.push([name, index + 1 - lastSSR, time, key, item_id, type])
         lastSSR = index + 1
         detail.count5++
         detail.countMio = 0

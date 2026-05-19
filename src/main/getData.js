@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const util = require('util')
 const path = require('path')
 const { URL } = require('url')
-const { app, ipcMain, shell } = require('electron')
+const { app, ipcMain, shell, dialog } = require('electron')
 const { sleep, request, sendMsg, readJSON, saveJSON, detectLocale, getCacheText, userDataPath, userPath, localIp, langMap } = require('./utils')
 const config = require('./config')
 const i18n = require('./i18n')
@@ -56,6 +56,10 @@ const findDataFiles = async (dataPath, fileMap) => {
 const collectDataFiles = async () => {
   await fs.ensureDir(userDataPath)
   const fileMap = new Map()
+  const externalPath = config.externalDataPath
+  if (externalPath && await fs.pathExists(externalPath)) {
+    await findDataFiles(externalPath, fileMap)
+  }
   await findDataFiles(userDataPath, fileMap)
   return fileMap
 }
@@ -533,6 +537,14 @@ ipcMain.handle('OPEN_CACHE_FOLDER', () => {
   if (cacheFolder) {
     shell.openPath(cacheFolder)
   }
+})
+
+ipcMain.handle('PICK_FOLDER', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+  if (result.canceled || !result.filePaths.length) return ''
+  return result.filePaths[0]
 })
 
 exports.getData = () => {
