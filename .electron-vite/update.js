@@ -25,7 +25,6 @@ const start = async () => {
   const zipPath = path.resolve(outputPath, name)
   await fs.ensureDir(outputPath)
   await fs.emptyDir(outputPath)
-  await fs.outputFile('./build/update/CNAME', 'star-rail-warp-export.css.moe')
   createZip(appPath, zipPath)
   const buffer = await fs.readFile(zipPath)
   const sha256 = hash(buffer)

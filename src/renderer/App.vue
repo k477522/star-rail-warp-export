@@ -40,6 +40,7 @@
               <el-dropdown-item :disabled="!allowClick() || state.status === 'loading'" command="url" icon="link">{{ui.button.url}}</el-dropdown-item>
               <el-dropdown-item command="copyUrl" icon="DocumentCopy">{{ui.button.copyUrl}}</el-dropdown-item>
               <el-dropdown-item :disabled="!allowClick() || state.status === 'loading'" command="proxy" icon="position">{{ui.button.startProxy}}</el-dropdown-item>
+              <el-dropdown-item command="checkUpdate" icon="Download" divided>檢查更新</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -390,6 +391,48 @@ const optionCommand = (type) => {
     fetchData('proxy')
   } else if (type === 'copyUrl') {
     copyUrl()
+  } else if (type === 'checkUpdate') {
+    checkUpdate()
+  }
+}
+
+const checkUpdate = async () => {
+  let info
+  try {
+    info = await ipcRenderer.invoke('CHECK_UPDATE')
+  } catch (e) {
+    ElMessage.error('檢查更新失敗，請確認網路連線')
+    return
+  }
+  if (info.installed) {
+    ElMessage.success('新版本已安裝，重新啟動後生效')
+    state.status = 'updated'
+    return
+  }
+  if (!info.hasUpdate) {
+    ElMessage.success(`已是最新版本 v${info.current}`)
+    return
+  }
+  if (info.isDev) {
+    ElMessage.info(`有新版本 v${info.latest}（開發模式不能安裝）`)
+    return
+  }
+  try {
+    await ElMessageBox.confirm(`目前版本 v${info.current}，最新版本 v${info.latest}。要現在更新嗎？`, '發現新版本', {
+      confirmButtonText: '更新',
+      cancelButtonText: '稍後'
+    })
+  } catch (e) {
+    return
+  }
+  const loading = ElMessage({ message: '正在下載更新…', type: 'info', duration: 0 })
+  try {
+    const ok = await ipcRenderer.invoke('INSTALL_UPDATE')
+    loading.close()
+    if (ok) ElMessage.success('更新完成，按「重新啟動」即可套用')
+  } catch (e) {
+    loading.close()
+    ElMessage.error('更新失敗：' + (e.message || e))
   }
 }
 
@@ -421,6 +464,11 @@ onMounted(async () => {
 
   ipcRenderer.on('ERROR', (event, err) => {
     console.error(err)
+  })
+
+  // 關閉自動更新時，啟動檢查到新版只通知
+  ipcRenderer.on('NEW_VERSION', (event, newVersion) => {
+    ElMessage({ message: `發現新版本 v${newVersion}，可從「選項 → 檢查更新」安裝`, type: 'info', duration: 8000, showClose: true })
   })
 
   ipcRenderer.on('UPDATE_HINT', (event, message) => {
