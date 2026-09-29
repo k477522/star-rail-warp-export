@@ -1,5 +1,5 @@
 <template>
-  <div class="chart mb-2 relative h-48 lg:h-56 xl:h-64 2xl:h-72">
+  <div class="chart mb-2 relative h-44 lg:h-48 xl:h-52 2xl:h-56">
     <div ref="chart" class="absolute inset-0"></div>
   </div>
 </template>

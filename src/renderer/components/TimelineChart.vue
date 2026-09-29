@@ -6,16 +6,21 @@
       </h3>
       <span class="text-gray-400 text-sm">每月抽數（柱）vs 每月 5★ 數（點）</span>
     </div>
+    <div class="flex items-center gap-4 mb-2 text-sm text-gray-500">
+      <span>計入：限定</span>
+      <el-checkbox v-model="include.collab">連動</el-checkbox>
+      <el-checkbox v-model="include.standard">常駐（含新手）</el-checkbox>
+    </div>
     <div ref="chartEl" class="w-full h-56 xl:h-96"></div>
     <p class="text-gray-400 text-[13px] mt-2 leading-relaxed">
-      含全部 banner（含常駐、新手）；月份依抽卡時間（本地時區）分桶。
+      月份依抽卡時間（本地時區）分桶。
       <span v-if="peakMonth"> · 最高峰：<span class="text-gray-600 font-medium">{{ peakMonth.label }}</span> 抽了 {{ peakMonth.total }} 抽。</span>
     </p>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { computed, reactive, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { use, init } from 'echarts/core'
 import {
   TitleComponent, TooltipComponent, LegendComponent,
@@ -33,11 +38,38 @@ const props = defineProps({
 const chartEl = ref(null)
 let chart = null
 
+// 限定池（11/12）一律計入；連動、常駐（含新手）可切換
+const include = reactive({ collab: true, standard: false })
+
+const includedKeys = computed(() => {
+  const keys = new Set(['11', '12'])
+  if (include.collab) { keys.add('21'); keys.add('22') }
+  if (include.standard) { keys.add('1'); keys.add('2') }
+  return keys
+})
+
+// 月份範圍以全部資料為準，切換篩選時 X 軸不會跳動
+const allMonths = computed(() => {
+  const result = props.gachaData?.result
+  if (!result) return []
+  const set = new Set()
+  for (const [, list] of result) {
+    if (!Array.isArray(list)) continue
+    for (const it of list) {
+      const d = new Date(it.time)
+      if (isNaN(d.getTime())) continue
+      set.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    }
+  }
+  return [...set].sort()
+})
+
 const buckets = computed(() => {
   const result = props.gachaData?.result
   if (!result) return []
-  const map = new Map() // 'YYYY-MM' -> { total, ssr }
-  for (const [, list] of result) {
+  const map = new Map(allMonths.value.map(k => [k, { total: 0, ssr: 0 }])) // 'YYYY-MM' -> { total, ssr }
+  for (const [key, list] of result) {
+    if (!includedKeys.value.has(key)) continue
     if (!Array.isArray(list)) continue
     for (const it of list) {
       const d = new Date(it.time)

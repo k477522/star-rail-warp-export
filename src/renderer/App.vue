@@ -28,7 +28,7 @@
           <el-option
             v-for="item of dataMap"
             :key="item[0]"
-            :label="maskUid(item[0])"
+            :label="maskUid(item[0]) + (item[1].mock ? '（測試）' : '')"
             :value="item[0]">
           </el-option>
         </el-select>
@@ -75,7 +75,7 @@
                 <span v-if="COLLAB_BANNER_KEYS.has(item[0])" class="ml-1 align-middle bg-sky-100 text-sky-600 text-[13px] font-bold px-1.5 py-0.5 rounded">聯動</span>
               </p>
               <pie-chart :data="item" :i18n="state.i18n" :typeMap="typeMap"></pie-chart>
-              <gacha-detail :i18n="state.i18n" :data="item" :typeMap="typeMap"></gacha-detail>
+              <gacha-detail :i18n="state.i18n" :data="item" :typeMap="typeMap" :coneOwners="coneOwners"></gacha-detail>
             </div>
           </template>
         </div>
@@ -88,7 +88,7 @@
         <timeline-chart :gachaData="gachaData"></timeline-chart>
       </el-tab-pane>
       <el-tab-pane label="5★ 收藏" name="collection" lazy>
-        <character-list :detail="detail" :typeMap="typeMap"></character-list>
+        <character-list :detail="detail" :typeMap="typeMap" :coneOwners="coneOwners"></character-list>
       </el-tab-pane>
     </el-tabs>
     <Setting v-show="state.showSetting" :i18n="state.i18n" :gacha-data-info="dataInfo" @refreshData="readData()" @changeLang="getI18nData()" @close="showSetting(false)"></Setting>
@@ -129,6 +129,7 @@ import LuckStats from './components/LuckStats.vue'
 import CharacterList from './components/CharacterList.vue'
 import TimelineChart from './components/TimelineChart.vue'
 import gachaDetail from './gachaDetail'
+import { buildConeOwners } from './coneOwner'
 import { version } from '../../package.json'
 import gachaType from '../gachaType.json'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -224,6 +225,9 @@ const hint = computed(() => {
   }
   return '　'
 })
+
+// 光錐 item_id -> 對應角色名稱
+const coneOwners = computed(() => buildConeOwners(detail.value, state.config.lang))
 
 const detail = computed(() => {
   const data = dataMap.value.get(state.current)

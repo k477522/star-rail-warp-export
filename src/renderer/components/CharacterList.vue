@@ -50,7 +50,7 @@
           <div class="flex items-center justify-between mt-0.5">
             <div class="flex items-center gap-1.5">
               <span class="text-gray-500 text-[13px]">×{{ ch.count }}</span>
-              <span v-if="ch.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-xs font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${ch.totalLostBefore} 次`">歪 {{ ch.totalLostBefore }}</span>
+              <span v-if="ch.totalLostBefore > 0" class="bg-red-500 text-white text-xs font-bold px-1.5 py-px rounded leading-tight shadow-sm" :title="`為了拿他歪了 ${ch.totalLostBefore} 次`">歪 {{ ch.totalLostBefore }}</span>
               <span v-if="ch.isStandard" class="text-gray-400 text-xs">常駐</span>
               <span v-if="ch.isCollab" class="bg-sky-100 text-sky-600 text-xs font-bold px-1 rounded leading-tight">聯動</span>
             </div>
@@ -72,7 +72,7 @@
              :title="cardTitle(co)"
              class="border border-gray-200 rounded-lg p-2.5 cursor-help transition-shadow hover:shadow-md">
           <div class="flex items-center justify-between gap-1">
-            <span class="font-semibold text-gray-800 text-base truncate" :title="co.name">{{ co.name }}</span>
+            <span class="font-semibold text-gray-800 text-base truncate" :title="coneLabel(co)">{{ coneLabel(co) }}</span>
             <span :class="superimpositionClass(co.superimposition)" class="text-[13px] font-bold px-1.5 py-0.5 rounded leading-none flex-shrink-0">
               S{{ co.superimposition }}<span v-if="co.overflow" class="opacity-70">+{{ co.overflow }}</span>
             </span>
@@ -85,7 +85,7 @@
           <div class="flex items-center justify-between mt-0.5">
             <div class="flex items-center gap-1.5">
               <span class="text-gray-500 text-[13px]">×{{ co.count }}</span>
-              <span v-if="co.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-xs font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${co.totalLostBefore} 次`">歪 {{ co.totalLostBefore }}</span>
+              <span v-if="co.totalLostBefore > 0" class="bg-red-500 text-white text-xs font-bold px-1.5 py-px rounded leading-tight shadow-sm" :title="`為了拿他歪了 ${co.totalLostBefore} 次`">歪 {{ co.totalLostBefore }}</span>
               <span v-if="co.isStandard" class="text-gray-400 text-xs">常駐</span>
               <span v-if="co.isCollab" class="bg-sky-100 text-sky-600 text-xs font-bold px-1 rounded leading-tight">聯動</span>
             </div>
@@ -150,10 +150,17 @@ const applyFilters = (list, isWeaponList) => {
 
 const props = defineProps({
   detail: Map,
-  typeMap: Map
+  typeMap: Map,
+  coneOwners: Map
 })
 
 const cleanName = (name) => (name || '').replace(/<[^>]+>/g, '')
+
+// 光錐名稱前加上對應角色，例如【緋英】邂逅於下一個花季
+const coneLabel = (co) => {
+  const owner = props.coneOwners?.get(co.itemId)
+  return owner ? `【${owner}】${co.name}` : co.name
+}
 
 // 對每筆 5★ 計算「實際花費」：在限定池歪了之後，把那些被浪費的 pity 算進下一隻限定的成本
 const attributePulls = (detail) => {

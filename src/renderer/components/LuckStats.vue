@@ -316,8 +316,19 @@ const fiftyStats = computed(() => {
 const totalWon = computed(() => fiftyStats.value.reduce((a, s) => a + s.won, 0))
 const totalFifty = computed(() => fiftyStats.value.reduce((a, s) => a + s.fifty, 0))
 
-const charStats = computed(() => fiftyStats.value.find(s => s.key === '11' || s.key === '21'))
-const coneStats = computed(() => fiftyStats.value.find(s => s.key === '12' || s.key === '22'))
+// 合併活動池與聯動池（例如 11 + 21），均限定依限定數加權
+const mergeStats = (keys) => {
+  const list = fiftyStats.value.filter(s => keys.includes(s.key) && s.effectiveAvg !== null)
+  if (!list.length) return null
+  const won = list.reduce((a, s) => a + s.won, 0)
+  const lost = list.reduce((a, s) => a + s.lost, 0)
+  const limited = list.reduce((a, s) => a + s.won + s.lost, 0)
+  const sumPity = list.reduce((a, s) => a + s.effectiveAvg * (s.won + s.lost), 0)
+  return { won, lost, effectiveAvg: Math.round(sumPity / limited * 10) / 10 }
+}
+
+const charStats = computed(() => mergeStats(['11', '21']))
+const coneStats = computed(() => mergeStats(['12', '22']))
 
 const overallEffective = computed(() => {
   const list = fiftyStats.value
@@ -346,10 +357,10 @@ const theoreticalExpected = computed(() => {
 // 命座+光錐 組合：X+Y = X 命角色 + Y 把光錐
 const costPlans = [
   { label: '0+0', desc: '只抽角色',          char: 1, cone: 0 },
-  { label: '0+1', desc: '角色 + 專武',       char: 1, cone: 1 },
+  { label: '0+1', desc: '角色 + 光錐',       char: 1, cone: 1 },
   { label: '1+0', desc: '1 命角色',          char: 2, cone: 0 },
-  { label: '1+1', desc: '1 命 + 專武',       char: 2, cone: 1, highlight: true },
-  { label: '2+1', desc: '2 命 + 專武',       char: 3, cone: 1 }
+  { label: '1+1', desc: '1 命 + 光錐',       char: 2, cone: 1, highlight: true },
+  { label: '2+1', desc: '2 命 + 光錐',       char: 3, cone: 1 }
 ]
 
 const costEstimate = computed(() => {

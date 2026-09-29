@@ -102,6 +102,7 @@ const data = {
   ],
   time: Date.now(),
   uid: '100000001',
+  mock: true, // 測試資料：UID 選單會標示（測試）
   lang: 'zh-tw',
   region: 'prod_gf_cn',
   region_time_zone: 8

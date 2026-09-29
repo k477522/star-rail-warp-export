@@ -55,25 +55,25 @@
         </span>
       </span>
     </div>
-    <div class="grid grid-cols-2 gap-1.5 max-h-[300px] overflow-y-auto pr-1">
+    <div class="grid grid-cols-1 gap-1 max-h-[340px] overflow-y-auto pr-1">
       <div v-for="{ item, no } of ssrList"
         :key="no"
         :title="ssrTitle(item)"
         class="relative overflow-hidden rounded border border-gray-200 bg-white cursor-help hover:border-gray-300">
-        <div class="flex items-center gap-2 px-2 py-1 text-[15px] leading-tight">
+        <!-- 保底進度：整行淺色填滿，長度 = 抽數 / 硬保底 -->
+        <div :class="tierBar[rowTier(item)]" class="absolute inset-y-0 left-0"
+             :style="`width:${Math.min(item[1] / pityLimits(item[3]).hard * 100, 100)}%`"></div>
+        <div class="relative flex items-center gap-2 px-2 py-1 text-[15px] leading-tight">
           <span class="w-7 flex-shrink-0 text-xs text-gray-400 tabular-nums">#{{no}}</span>
           <!-- 只有常駐池會同時出角色和光錐：角色 = 人形、光錐 = 漏斗 -->
           <el-icon v-if="type === '1'" class="flex-shrink-0 text-gray-400" :title="isWeaponItem(item) ? text.weapon : text.character">
             <Filter v-if="isWeaponItem(item)" />
             <User v-else />
           </el-icon>
-          <span class="min-w-0 truncate text-gray-700">{{cleanName(item[0])}}</span>
-          <span v-if="isOff(item)" class="flex-shrink-0 text-xs text-rose-500 border border-rose-300 px-1 rounded leading-tight">歪</span>
-          <span :class="tierText[pityTier(item[1], item[3])]" class="ml-auto w-8 flex-shrink-0 text-right font-bold tabular-nums">{{item[1]}}</span>
+          <span class="min-w-0 truncate text-gray-700">{{displayName(item)}}</span>
+          <span v-if="isOff(item)" class="flex-shrink-0 text-xs font-bold text-white bg-red-500 px-1.5 py-px rounded leading-tight shadow-sm">歪</span>
+          <span :class="tierText[rowTier(item)]" class="ml-auto w-8 flex-shrink-0 text-right font-bold tabular-nums">{{item[1]}}</span>
         </div>
-        <!-- 保底進度：抽數 / 硬保底 -->
-        <div :class="tierBar[pityTier(item[1], item[3])]" class="absolute left-0 bottom-0 h-0.5"
-             :style="`width:${Math.min(item[1] / pityLimits(item[3]).hard * 100, 100)}%`"></div>
       </div>
     </div>
   </div>
@@ -87,7 +87,8 @@ import { isOffBanner } from '../constants'
 const props = defineProps({
   data: Object,
   typeMap: Map,
-  i18n: Object
+  i18n: Object,
+  coneOwners: Map
 })
 
 const type = computed(() => props.data[0])
@@ -142,17 +143,26 @@ const tierText = {
 }
 
 const tierBar = {
-  lucky: 'bg-emerald-400',
-  mid:   'bg-gray-300',
-  soft:  'bg-orange-400',
-  hard:  'bg-red-500'
+  lucky: 'bg-emerald-100',
+  mid:   'bg-gray-200',
+  soft:  'bg-orange-100',
+  hard:  'bg-red-100'
 }
 
 const isWeaponItem = (item) => isWeapon(item[5])
 
 const isOff = (item) => isOffBanner(item[3], item[4])
 
+// 歪了一律用硬保底的顏色
+const rowTier = (item) => isOff(item) ? 'hard' : pityTier(item[1], item[3])
+
 const cleanName = (name) => (name || '').replace(/<[^>]+>/g, '')
+
+// 光錐名稱前加上對應角色，例如【緋英】邂逅於下一個花季
+const displayName = (item) => {
+  const owner = isWeaponItem(item) ? props.coneOwners?.get(item[4]) : null
+  return owner ? `【${owner}】${cleanName(item[0])}` : cleanName(item[0])
+}
 
 const ssrTitle = (item) => {
   const date = new Date(item[2]).toLocaleString()
@@ -160,7 +170,7 @@ const ssrTitle = (item) => {
   const tierLabel = text.value.pity?.[tier] || ''
   const offLabel = isOff(item) ? `\n${text.value.offBanner || '歪'}` : ''
   const typeLabel = isWeaponItem(item) ? text.value.weapon : text.value.character
-  const head = `${cleanName(item[0])}（${typeLabel}）\n${date}`
+  const head = `${displayName(item)}（${typeLabel}）\n${date}`
   return (tierLabel ? `${head}\n${tierLabel}` : head) + offLabel
 }
 </script>
