@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const fetch = require('electron-fetch').default
-const { BrowserWindow, app } = require('electron')
+const { BrowserWindow, app, screen } = require('electron')
 const crypto = require('crypto')
 const unhandled = require('electron-unhandled')
 const windowStateKeeper = require('electron-window-state')
@@ -17,21 +17,29 @@ const userDataPath = path.resolve(appRoot, 'userData')
 
 let win = null
 const initWindow = () => {
+  // 以 1920×1080 為設計尺寸，螢幕工作區較小時縮到放得下
+  const { workAreaSize } = screen.getPrimaryDisplay()
   let mainWindowState = windowStateKeeper({
-    defaultWidth: 888,
-    defaultHeight: 550
+    // 換檔名讓舊版記住的小視窗尺寸失效，改用新的預設大小
+    file: 'window-state-v2.json',
+    defaultWidth: Math.min(1920, workAreaSize.width),
+    defaultHeight: Math.min(1080, workAreaSize.height)
   })
   win = new BrowserWindow({
     x: mainWindowState.x,
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    minWidth: 1280,
+    minHeight: 720,
     backgroundColor: '#fff',
     webPreferences: {
       contextIsolation:false,
       nodeIntegration: true
     }
   })
+  // 預設開啟時最大化；取消最大化後會回到上面記住的大小
+  win.maximize()
   const saveState = debounce(mainWindowState.saveState, 500)
   win.on('resize', () => saveState(win))
   win.on('move', () => saveState(win))

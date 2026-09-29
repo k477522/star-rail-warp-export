@@ -1,13 +1,13 @@
 <template>
   <div v-if="hasData" class="mt-4 p-5 bg-white rounded-xl border border-gray-200 shadow-sm border-t-4 border-t-violet-400">
     <div class="flex items-baseline justify-between mb-3 pb-3 border-b border-gray-100">
-      <h3 class="text-base font-semibold text-violet-700 flex items-center gap-1.5">
+      <h3 class="text-lg font-semibold text-violet-700 flex items-center gap-1.5">
         <span>📈</span>抽卡節奏
       </h3>
-      <span class="text-gray-400 text-xs">每月抽數（柱）vs 每月 5★ 數（點）</span>
+      <span class="text-gray-400 text-sm">每月抽數（柱）vs 每月 5★ 數（點）</span>
     </div>
-    <div ref="chartEl" class="w-full h-56"></div>
-    <p class="text-gray-400 text-[11px] mt-2 leading-relaxed">
+    <div ref="chartEl" class="w-full h-56 xl:h-96"></div>
+    <p class="text-gray-400 text-[13px] mt-2 leading-relaxed">
       含全部 banner（含常駐、新手）；月份依抽卡時間（本地時區）分桶。
       <span v-if="peakMonth"> · 最高峰：<span class="text-gray-600 font-medium">{{ peakMonth.label }}</span> 抽了 {{ peakMonth.total }} 抽。</span>
     </p>
@@ -81,34 +81,34 @@ const buildOption = () => {
         return `${month}<br/>抽數: <b>${total}</b><br/>5★: <b>${ssr}</b> (${rate}%)`
       },
       padding: 6,
-      textStyle: { fontSize: 12 }
+      textStyle: { fontSize: 14 }
     },
     legend: {
       data: ['抽數', '5★'],
       top: 0,
       right: 0,
-      textStyle: { fontSize: 11 },
+      textStyle: { fontSize: 13 },
       itemGap: 12
     },
     xAxis: {
       type: 'category',
       data: xs,
-      axisLabel: { fontSize: 10, color: '#9ca3af', interval: 'auto', rotate: xs.length > 12 ? 30 : 0 },
+      axisLabel: { fontSize: 12, color: '#9ca3af', interval: 'auto', rotate: xs.length > 12 ? 30 : 0 },
       axisLine: { lineStyle: { color: '#e5e7eb' } }
     },
     yAxis: [
       {
         type: 'value',
         name: '抽數',
-        nameTextStyle: { fontSize: 10, color: '#9ca3af' },
-        axisLabel: { fontSize: 10, color: '#9ca3af' },
+        nameTextStyle: { fontSize: 12, color: '#9ca3af' },
+        axisLabel: { fontSize: 12, color: '#9ca3af' },
         splitLine: { lineStyle: { color: '#f3f4f6' } }
       },
       {
         type: 'value',
         name: '5★',
-        nameTextStyle: { fontSize: 10, color: '#9ca3af' },
-        axisLabel: { fontSize: 10, color: '#9ca3af' },
+        nameTextStyle: { fontSize: 12, color: '#9ca3af' },
+        axisLabel: { fontSize: 12, color: '#9ca3af' },
         splitLine: { show: false },
         minInterval: 1
       }

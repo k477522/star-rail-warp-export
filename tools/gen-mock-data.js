@@ -1,4 +1,4 @@
-// 產生測試用抽卡資料，輸出到 userData/gacha-list-100000001.json
+// 產生測試用抽卡資料，輸出到 dist/userData/gacha-list-100000001.json（yarn dev 讀取的資料夾）
 const fs = require('fs')
 const path = require('path')
 
@@ -10,7 +10,7 @@ const weap3 = ['鋒銳如影', '智慧觀星者', '穿徹號令', '琥珀', '幻
 
 let idBase = 1682521800010000000n
 let timeBase = new Date('2023-04-26T12:00:00+08:00').getTime()
-const TIME_STEP = 30000 // 30秒一抽
+const TIME_STEP = 3 * 60 * 60 * 1000 // 3 小時一抽，讓資料跨好幾個月，抽卡節奏圖才看得到
 
 function makeId() {
   idBase += 1n
@@ -107,7 +107,7 @@ const data = {
   region_time_zone: 8
 }
 
-const outPath = path.resolve(__dirname, '../userData/gacha-list-100000001.json')
+const outPath = path.resolve(__dirname, '../dist/userData/gacha-list-100000001.json')
 fs.mkdirSync(path.dirname(outPath), { recursive: true })
 fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf8')
 console.log('產生完成：', outPath)

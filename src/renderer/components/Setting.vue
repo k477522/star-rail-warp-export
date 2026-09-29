@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white py-4 px-6 w-screen h-screen fixed inset-0 overflow-y-auto">
     <div class="flex content-center items-center mb-4 justify-between">
-      <h3 class="text-lg">{{text.title}}</h3>
+      <h3 class="text-xl">{{text.title}}</h3>
       <el-button icon="close" @click="closeSetting" plain circle type="default" class="w-8 h-8 shadow-md focus:shadow-none focus:outline-none fixed top-4 right-6"></el-button>
     </div>
     <el-form :model="settingForm" label-width="120px">
@@ -9,7 +9,7 @@
         <el-select @change="saveLang" v-model="settingForm.lang" class="!w-44">
           <el-option v-for="item of data.langMap" :key="item[0]" :label="item[1]" :value="item[0]"></el-option>
         </el-select>
-        <p class="text-gray-400 text-xs m-1.5">{{text.languageHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.languageHint}}</p>
       </el-form-item>
       <el-form-item :label="text.logType">
         <el-radio-group @change="saveSetting" v-model.number="settingForm.logType">
@@ -17,11 +17,11 @@
           <el-radio-button :label="1">{{text.cnServer}}</el-radio-button>
           <el-radio-button :label="2">{{text.seaServer}}</el-radio-button>
         </el-radio-group>
-        <p class="text-gray-400 text-xs m-1.5">{{text.logTypeHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.logTypeHint}}</p>
       </el-form-item>
       <el-form-item :label="common.data">
         <el-button type="primary" plain @click="state.showDataDialog = true">{{common.dataManage}}</el-button>
-        <p class="text-gray-400 text-xs m-1.5">{{text.dataManagerHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.dataManagerHint}}</p>
       </el-form-item>
       <el-form-item :label="text.autoUpdate">
         <el-switch
@@ -40,30 +40,30 @@
           @change="saveSetting"
           v-model="settingForm.fetchFullHistory">
         </el-switch>
-        <p class="text-gray-400 text-xs m-1.5">{{text.fetchFullHistoryHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.fetchFullHistoryHint}}</p>
       </el-form-item>
       <el-form-item :label="text.externalDataPath">
         <div class="flex gap-2 w-full">
           <el-input v-model="settingForm.externalDataPath" :placeholder="text.externalDataPathPlaceholder" clearable @change="saveExternalDataPath" class="!w-96"></el-input>
           <el-button @click="pickExternalDataPath">{{text.browse}}</el-button>
         </div>
-        <p class="text-gray-400 text-xs m-1.5">{{text.externalDataPathHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.externalDataPathHint}}</p>
       </el-form-item>
       <el-form-item :label="text.proxyMode">
         <el-switch
           @change="saveSetting"
           v-model="settingForm.proxyMode">
         </el-switch>
-        <p class="text-gray-400 text-xs m-1.5">{{text.proxyModeHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.proxyModeHint}}</p>
         <el-button class="focus:outline-none" @click="disableProxy">{{text.closeProxy}}</el-button>
-        <p class="text-gray-400 text-xs m-1.5">{{text.closeProxyHint}}</p>
+        <p class="text-gray-400 text-sm m-1.5">{{text.closeProxyHint}}</p>
       </el-form-item>
     </el-form>
-    <h3 class="text-lg my-4">{{about.title}}</h3>
-    <p class="text-gray-600 text-xs mt-1">{{text.idVersion}} {{idJson.version}}</p>
-    <p class="text-gray-600 text-xs mt-1">{{about.license}}</p>
-    <p class="text-gray-600 text-xs mt-1">Github: <a @click="openGithub" class="cursor-pointer text-blue-400">https://github.com/biuuu/star-rail-warp-export</a></p>
-    <p class="text-gray-600 text-xs mt-1 pb-6">UIGF: <a @click="openUIGF" class="cursor-pointer text-blue-400">https://uigf.org/</a></p>
+    <h3 class="text-xl my-4">{{about.title}}</h3>
+    <p class="text-gray-600 text-sm mt-1">{{text.idVersion}} {{idJson.version}}</p>
+    <p class="text-gray-600 text-sm mt-1">{{about.license}}</p>
+    <p class="text-gray-600 text-sm mt-1">Github: <a @click="openGithub" class="cursor-pointer text-blue-400">https://github.com/biuuu/star-rail-warp-export</a></p>
+    <p class="text-gray-600 text-sm mt-1 pb-6">UIGF: <a @click="openUIGF" class="cursor-pointer text-blue-400">https://uigf.org/</a></p>
     <el-dialog v-model="state.showDataDialog" :title="common.dataManage" width="90%">
       <div class="">
         <el-table :data="gachaDataInfo" border stripe>

@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --el-font-size-base: 12px !important;
+    --el-font-size-base: 15px !important;
   }
   ::-webkit-scrollbar {
     width: 6px;
@@ -18,5 +18,11 @@
 @layer utilities {
   .cache-clean-dialog .el-dialog__body {
     padding: 0 20px;
+  }
+}
+@layer utilities {
+  .main-tabs .el-tabs__item {
+    font-size: 16px;
+    height: 44px;
   }
 }

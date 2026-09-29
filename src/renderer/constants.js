@@ -11,6 +11,9 @@ export const STANDARD_5STAR = new Set([
 // 限定池 banner key（角色/光錐池）
 export const EVENT_BANNER_KEYS = new Set(['11', '12', '21', '22'])
 
+// 聯動池 banner key
+export const COLLAB_BANNER_KEYS = new Set(['21', '22'])
+
 // 判斷某筆 5★ 是否是「歪」：在限定池但拿到常駐池角色/光錐
 export const isOffBanner = (bannerKey, itemId) => {
   return EVENT_BANNER_KEYS.has(bannerKey) && STANDARD_5STAR.has(itemId)

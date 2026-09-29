@@ -6,6 +6,6 @@ import 'element-plus/dist/index.css'
 import { IconInstaller } from './utils'
 
 const app = createApp(App)
-app.use(ElementPlus)
+app.use(ElementPlus, { size: 'large' })
 IconInstaller(app)
 app.mount('#app')

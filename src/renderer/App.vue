@@ -1,5 +1,5 @@
 <template>
-  <div v-if="ui" class="relative">
+  <div v-if="ui" class="relative max-w-screen-2xl mx-auto">
     <div class="flex justify-between">
       <div class="space-x-3">
         <el-button type="primary" :icon="state.status === 'init' ? 'milk-tea': 'refresh-right'" class="focus:outline-none" :disabled="!allowClick()" plain @click="fetchData()" :loading="state.status === 'loading'">{{state.status === 'init' ? ui.button.load: ui.button.update}}</el-button>
@@ -45,7 +45,7 @@
         </el-dropdown>
       </div>
     </div>
-    <div class="my-3 flex items-center gap-2 text-xs flex-wrap">
+    <div class="my-3 flex items-center gap-2 text-sm flex-wrap">
       <span v-if="state.status === 'loaded'" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
         {{hint}}
@@ -65,18 +65,32 @@
       <span v-else class="text-gray-400 px-2.5 py-1">{{hint}}</span>
       <el-button @click="(state.showCacheCleanDlg=true)" v-if="state.authkeyTimeout" size="small" plain round>{{ui.button.solution}}</el-button>
     </div>
-    <div v-if="detail" class="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-screen-xl mx-auto">
-      <div class="mb-4" v-for="(item, i) of detail" :key="i">
-        <div :class="{hidden: state.config.hideNovice && item[0] === '2'}">
-          <p class="text-center text-gray-700 my-2 text-base font-semibold">{{typeMap.get(item[0])}}</p>
-          <pie-chart :data="item" :i18n="state.i18n" :typeMap="typeMap"></pie-chart>
-          <gacha-detail :i18n="state.i18n" :data="item" :typeMap="typeMap"></gacha-detail>
+    <el-tabs v-if="detail" v-model="state.activeTab" class="main-tabs">
+      <el-tab-pane label="卡池總覽" name="pools">
+        <div class="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <template v-for="item of detail" :key="item[0]">
+            <div class="mb-4" v-if="!(state.config.hideNovice && item[0] === '2')">
+              <p class="text-center text-gray-700 my-2 text-lg font-semibold">
+                {{typeMap.get(item[0])}}
+                <span v-if="COLLAB_BANNER_KEYS.has(item[0])" class="ml-1 align-middle bg-sky-100 text-sky-600 text-[13px] font-bold px-1.5 py-0.5 rounded">聯動</span>
+              </p>
+              <pie-chart :data="item" :i18n="state.i18n" :typeMap="typeMap"></pie-chart>
+              <gacha-detail :i18n="state.i18n" :data="item" :typeMap="typeMap"></gacha-detail>
+            </div>
+          </template>
         </div>
-      </div>
-    </div>
-    <luck-stats v-if="detail" :detail="detail" :typeMap="typeMap"></luck-stats>
-    <timeline-chart v-if="detail" :gachaData="gachaData"></timeline-chart>
-    <character-list v-if="detail" :detail="detail" :typeMap="typeMap"></character-list>
+      </el-tab-pane>
+      <!-- lazy：第一次切到該頁才渲染，避免圖表在隱藏狀態下量到 0 寬度 -->
+      <el-tab-pane label="幸運度分析" name="luck" lazy>
+        <luck-stats :detail="detail" :typeMap="typeMap"></luck-stats>
+      </el-tab-pane>
+      <el-tab-pane label="抽卡節奏" name="timeline" lazy>
+        <timeline-chart :gachaData="gachaData"></timeline-chart>
+      </el-tab-pane>
+      <el-tab-pane label="5★ 收藏" name="collection" lazy>
+        <character-list :detail="detail" :typeMap="typeMap"></character-list>
+      </el-tab-pane>
+    </el-tabs>
     <Setting v-show="state.showSetting" :i18n="state.i18n" :gacha-data-info="dataInfo" @refreshData="readData()" @changeLang="getI18nData()" @close="showSetting(false)"></Setting>
 
     <el-dialog :title="ui.urlDialog.title" v-model="state.showUrlDlg" width="90%" class="max-w-md">
@@ -92,10 +106,10 @@
 
     <el-dialog :title="ui.button.solution" v-model="state.showCacheCleanDlg" width="90%" class="max-w-md cache-clean-dialog">
       <el-button plain icon="folder" type="success" @click="openCacheFolder">{{ui.button.cacheFolder}}</el-button>
-      <p class="my-2 flex flex-col text-teal-800 text-[13px]">
+      <p class="my-2 flex flex-col text-teal-800 text-[15px]">
         <span class="my-1" v-for="txt of cacheCleanTextList">{{ txt }}</span>
       </p>
-      <p class="my-2 text-gray-500 text-xs">{{ui.extra.findCacheFolder}}</p>
+      <p class="my-2 text-gray-500 text-sm">{{ui.extra.findCacheFolder}}</p>
       <template #footer>
         <div class="dialog-footer text-center">
           <el-button  type="primary" @click="state.showCacheCleanDlg = false" class="focus:outline-none">{{ui.common.ok}}</el-button>
@@ -118,6 +132,7 @@ import gachaDetail from './gachaDetail'
 import { version } from '../../package.json'
 import gachaType from '../gachaType.json'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { COLLAB_BANNER_KEYS } from './constants'
 
 const state = reactive({
   status: 'init',
@@ -131,6 +146,7 @@ const state = reactive({
   showCacheCleanDlg: false,
   urlInput: '',
   authkeyTimeout: false,
+  activeTab: 'pools',
   config: {}
 })
 

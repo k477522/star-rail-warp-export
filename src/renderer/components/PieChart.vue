@@ -84,7 +84,7 @@ const updateChart = throttle(() => {
       },
       padding: 6,
       textStyle: {
-        fontSize: 12,
+        fontSize: 14,
       },
     },
     legend: {
@@ -92,7 +92,7 @@ const updateChart = throttle(() => {
       left: "center",
       selected: result[2],
       itemGap: 8,
-      textStyle: { fontSize: 11 },
+      textStyle: { fontSize: 13 },
     },
     color: result[1],
     series: [
@@ -110,7 +110,7 @@ const updateChart = throttle(() => {
           smooth: true,
         },
         label: {
-          fontSize: 11,
+          fontSize: 13,
           overflow: "break",
         },
         emphasis: {

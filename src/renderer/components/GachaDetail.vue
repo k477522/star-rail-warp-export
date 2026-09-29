@@ -1,15 +1,15 @@
 <template>
-  <p class="text-gray-500 text-sm mb-2 text-center whitespace-nowrap">
+  <p class="text-gray-500 text-base mb-2 text-center whitespace-nowrap">
     <span class="mx-2" :title="new Date(detail.date[0]).toLocaleString()">{{new Date(detail.date[0]).toLocaleDateString()}}</span>
     <span class="text-gray-300">—</span>
     <span class="mx-2" :title="new Date(detail.date[1]).toLocaleString()">{{new Date(detail.date[1]).toLocaleDateString()}}</span>
   </p>
 
   <div class="flex items-baseline justify-between mb-2 px-1">
-    <span class="text-gray-600 text-sm">
-      {{text.total}} <span class="text-violet-600 font-bold text-base tabular-nums">{{detail.total}}</span> {{text.times}}
+    <span class="text-gray-600 text-base">
+      {{text.total}} <span class="text-violet-600 font-bold text-lg tabular-nums">{{detail.total}}</span> {{text.times}}
     </span>
-    <span v-if="type !== '100'" class="text-gray-500 text-xs">
+    <span v-if="type !== '100'" class="text-gray-500 text-sm">
       {{text.sum}}<span class="mx-1 text-emerald-600 font-bold tabular-nums">{{detail.countMio}}</span>{{text.no5star}}
     </span>
   </div>
@@ -17,25 +17,25 @@
   <div class="mb-3">
     <div class="flex h-5 rounded-md overflow-hidden border border-gray-200 shadow-sm">
       <div v-if="detail.count5"
-           class="bg-yellow-400 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           class="bg-yellow-400 flex items-center justify-center text-xs font-bold text-white transition-all hover:brightness-110 cursor-help"
            :style="`width:${barPct(detail.count5, detail.total)}%`"
            :title="`${text.star5}${colon}${detail.count5}（${text.character}${colon}${detail.count5c}、${text.weapon}${colon}${detail.count5w}）`">
         <span v-if="barPct(detail.count5, detail.total) >= 4">{{ detail.count5 }}</span>
       </div>
       <div v-if="detail.count4"
-           class="bg-purple-500 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           class="bg-purple-500 flex items-center justify-center text-xs font-bold text-white transition-all hover:brightness-110 cursor-help"
            :style="`width:${barPct(detail.count4, detail.total)}%`"
            :title="`${text.star4}${colon}${detail.count4}（${text.character}${colon}${detail.count4c}、${text.weapon}${colon}${detail.count4w}）`">
         {{ detail.count4 }}
       </div>
       <div v-if="detail.count3"
-           class="bg-blue-400 flex items-center justify-center text-[10px] font-bold text-white transition-all hover:brightness-110 cursor-help"
+           class="bg-blue-400 flex items-center justify-center text-xs font-bold text-white transition-all hover:brightness-110 cursor-help"
            :style="`width:${barPct(detail.count3, detail.total)}%`"
            :title="`${text.star3}${colon}${detail.count3}`">
         {{ detail.count3 }}
       </div>
     </div>
-    <div class="flex justify-between text-[11px] text-gray-500 mt-1 px-0.5">
+    <div class="flex justify-between text-[13px] text-gray-500 mt-1 px-0.5">
       <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-yellow-400"></span>{{text.star5}} {{percent(detail.count5, detail.total)}}</span>
       <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-purple-500"></span>{{text.star4}} {{percent(detail.count4, detail.total)}}</span>
       <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-400"></span>{{text.star3}} {{percent(detail.count3, detail.total)}}</span>
@@ -44,25 +44,37 @@
 
   <div v-if="detail.ssrPos.length" class="mt-2">
     <div class="flex items-center justify-between mb-2">
-      <span class="text-gray-500 text-sm">{{text.history}}</span>
-      <span class="text-sm flex items-center gap-1">
+      <span class="text-gray-500 text-base">
+        {{text.history}}
+        <span class="text-gray-400 text-xs ml-1">最新 → 最早</span>
+      </span>
+      <span class="text-base flex items-center gap-1">
         <span class="text-gray-400">{{text.average}}{{colon}}</span>
         <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-bold leading-none">
           {{avg5(detail.ssrPos)}}
         </span>
       </span>
     </div>
-    <div class="flex flex-wrap gap-1.5">
-      <span v-for="(item, index) of detail.ssrPos"
-        :key="index"
+    <div class="grid grid-cols-2 gap-1.5 max-h-[300px] overflow-y-auto pr-1">
+      <div v-for="{ item, no } of ssrList"
+        :key="no"
         :title="ssrTitle(item)"
-        :class="pityTierClass(item[1], item[3])"
-        class="inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[13px] cursor-help leading-tight transition-transform hover:scale-105 hover:shadow-sm">
-        <span v-if="isOff(item)" class="bg-rose-500 text-white text-[10px] font-bold px-1 rounded leading-tight">歪</span>
-        <span v-else class="text-xs opacity-70">{{isWeaponItem(item) ? '◆' : '●'}}</span>
-        <span>{{cleanName(item[0])}}</span>
-        <span class="font-bold ml-0.5 tabular-nums">{{item[1]}}</span>
-      </span>
+        class="relative overflow-hidden rounded border border-gray-200 bg-white cursor-help hover:border-gray-300">
+        <div class="flex items-center gap-2 px-2 py-1 text-[15px] leading-tight">
+          <span class="w-7 flex-shrink-0 text-xs text-gray-400 tabular-nums">#{{no}}</span>
+          <!-- 只有常駐池會同時出角色和光錐：角色 = 人形、光錐 = 漏斗 -->
+          <el-icon v-if="type === '1'" class="flex-shrink-0 text-gray-400" :title="isWeaponItem(item) ? text.weapon : text.character">
+            <Filter v-if="isWeaponItem(item)" />
+            <User v-else />
+          </el-icon>
+          <span class="min-w-0 truncate text-gray-700">{{cleanName(item[0])}}</span>
+          <span v-if="isOff(item)" class="flex-shrink-0 text-xs text-rose-500 border border-rose-300 px-1 rounded leading-tight">歪</span>
+          <span :class="tierText[pityTier(item[1], item[3])]" class="ml-auto w-8 flex-shrink-0 text-right font-bold tabular-nums">{{item[1]}}</span>
+        </div>
+        <!-- 保底進度：抽數 / 硬保底 -->
+        <div :class="tierBar[pityTier(item[1], item[3])]" class="absolute left-0 bottom-0 h-0.5"
+             :style="`width:${Math.min(item[1] / pityLimits(item[3]).hard * 100, 100)}%`"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -82,6 +94,12 @@ const type = computed(() => props.data[0])
 const detail = computed(() => props.data[1])
 const text = computed(() => props.i18n.ui.data)
 const colon = computed(() => props.i18n.symbol.colon)
+
+// 最新的排最前面；no 為時間順序編號（#1 = 此池第一個 5★）
+const ssrList = computed(() => {
+  const list = detail.value.ssrPos
+  return list.map((item, i) => ({ item, no: i + 1 })).reverse()
+})
 
 const avg5 = (list) => {
   let n = 0
@@ -115,14 +133,20 @@ const pityTier = (pity, bannerKey) => {
   return 'lucky'
 }
 
-const tierClasses = {
-  lucky: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  mid:   'bg-yellow-50 text-yellow-700 border-yellow-200',
-  soft:  'bg-orange-50 text-orange-700 border-orange-200',
-  hard:  'bg-red-50 text-red-700 border-red-300'
+// 只有抽數與進度條帶顏色：綠 = 早出、灰 = 一般、橘 = 軟保底、紅 = 硬保底
+const tierText = {
+  lucky: 'text-emerald-600',
+  mid:   'text-gray-700',
+  soft:  'text-orange-500',
+  hard:  'text-red-600'
 }
 
-const pityTierClass = (pity, bannerKey) => tierClasses[pityTier(pity, bannerKey)]
+const tierBar = {
+  lucky: 'bg-emerald-400',
+  mid:   'bg-gray-300',
+  soft:  'bg-orange-400',
+  hard:  'bg-red-500'
+}
 
 const isWeaponItem = (item) => isWeapon(item[5])
 
@@ -135,6 +159,8 @@ const ssrTitle = (item) => {
   const tier = pityTier(item[1], item[3])
   const tierLabel = text.value.pity?.[tier] || ''
   const offLabel = isOff(item) ? `\n${text.value.offBanner || '歪'}` : ''
-  return (tierLabel ? `${date}\n${tierLabel}` : date) + offLabel
+  const typeLabel = isWeaponItem(item) ? text.value.weapon : text.value.character
+  const head = `${cleanName(item[0])}（${typeLabel}）\n${date}`
+  return (tierLabel ? `${head}\n${tierLabel}` : head) + offLabel
 }
 </script>

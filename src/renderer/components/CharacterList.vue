@@ -1,59 +1,60 @@
 <template>
   <div v-if="hasData" class="mt-4 p-5 bg-white rounded-xl border border-gray-200 shadow-sm border-t-4 border-t-violet-400">
     <div class="flex items-baseline justify-between mb-3 pb-3 border-b border-gray-100">
-      <h3 class="text-base font-semibold text-violet-700 flex items-center gap-1.5">
+      <h3 class="text-lg font-semibold text-violet-700 flex items-center gap-1.5">
         <span>⭐</span>5★ 收藏
       </h3>
-      <span class="text-gray-400 text-xs">
+      <span class="text-gray-400 text-sm">
         角色 {{ filteredCharacters.length }}/{{ characters.length }} · 光錐 {{ filteredCones.length }}/{{ cones.length }} · 限定池實際花費 {{ totalActualCost }} 抽
       </span>
     </div>
 
     <!-- Filter toolbar -->
     <div class="flex flex-wrap items-center gap-2 mb-4">
-      <el-input v-model="filters.search" placeholder="搜尋名稱..." size="small" clearable class="!w-44" prefix-icon="search"></el-input>
-      <el-select v-model="filters.sort" size="small" class="!w-32">
+      <el-input v-model="filters.search" placeholder="搜尋名稱..." clearable class="!w-44" prefix-icon="search"></el-input>
+      <el-select v-model="filters.sort" class="!w-32">
         <el-option label="花費 ↓" value="cost"></el-option>
         <el-option label="抽數 ↓" value="count"></el-option>
         <el-option label="命座 ↓" value="rank"></el-option>
         <el-option label="最近 ↓" value="recent"></el-option>
         <el-option label="首次 ↑" value="first"></el-option>
       </el-select>
-      <el-checkbox v-model="filters.onlyLimited" size="small">只看限定</el-checkbox>
-      <el-checkbox v-model="filters.onlyOff" size="small">只看歪過</el-checkbox>
-      <el-checkbox v-model="filters.onlyMax" size="small">只看 E6/S5</el-checkbox>
-      <el-button v-if="hasActiveFilter" size="small" text type="primary" @click="resetFilters">清除</el-button>
+      <el-checkbox v-model="filters.onlyLimited">只看限定</el-checkbox>
+      <el-checkbox v-model="filters.onlyOff">只看歪過</el-checkbox>
+      <el-checkbox v-model="filters.onlyMax">只看 E6/S5</el-checkbox>
+      <el-button v-if="hasActiveFilter" text type="primary" @click="resetFilters">清除</el-button>
     </div>
 
     <!-- 角色 -->
     <div v-if="filteredCharacters.length" class="mb-4">
       <div class="flex items-center gap-2 mb-2">
-        <span class="text-sm font-medium text-gray-600">角色</span>
-        <span class="text-gray-400 text-xs">({{ filteredCharacters.length }})</span>
+        <span class="text-base font-medium text-gray-600">角色</span>
+        <span class="text-gray-400 text-sm">({{ filteredCharacters.length }})</span>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2">
         <div v-for="ch of filteredCharacters" :key="ch.name"
              :class="ch.isStandard ? 'bg-gray-50' : 'bg-white'"
              :title="cardTitle(ch)"
              class="border border-gray-200 rounded-lg p-2.5 cursor-help transition-shadow hover:shadow-md">
           <div class="flex items-center justify-between gap-1">
-            <span class="font-semibold text-gray-800 text-sm truncate" :title="ch.name">{{ ch.name }}</span>
-            <span :class="constellationClass(ch.constellation)" class="text-[11px] font-bold px-1.5 py-0.5 rounded leading-none flex-shrink-0">
+            <span class="font-semibold text-gray-800 text-base truncate" :title="ch.name">{{ ch.name }}</span>
+            <span :class="constellationClass(ch.constellation)" class="text-[13px] font-bold px-1.5 py-0.5 rounded leading-none flex-shrink-0">
               E{{ ch.constellation }}<span v-if="ch.overflow" class="opacity-70">+{{ ch.overflow }}</span>
             </span>
           </div>
           <div class="flex items-baseline gap-1 mt-1.5">
-            <span :class="costColor(ch.avgActualCost)" class="text-base font-bold tabular-nums">{{ ch.totalActualCost }}</span>
-            <span class="text-gray-400 text-[10px]">抽</span>
-            <span v-if="ch.count > 1" class="text-gray-400 text-[10px] ml-1">(均 {{ ch.avgActualCost }})</span>
+            <span :class="costColor(ch.avgActualCost)" class="text-lg font-bold tabular-nums">{{ ch.totalActualCost }}</span>
+            <span class="text-gray-400 text-xs">抽</span>
+            <span v-if="ch.count > 1" class="text-gray-400 text-xs ml-1">(均 {{ ch.avgActualCost }})</span>
           </div>
           <div class="flex items-center justify-between mt-0.5">
             <div class="flex items-center gap-1.5">
-              <span class="text-gray-500 text-[11px]">×{{ ch.count }}</span>
-              <span v-if="ch.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-[10px] font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${ch.totalLostBefore} 次`">歪 {{ ch.totalLostBefore }}</span>
-              <span v-if="ch.isStandard" class="text-gray-400 text-[10px]">常駐</span>
+              <span class="text-gray-500 text-[13px]">×{{ ch.count }}</span>
+              <span v-if="ch.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-xs font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${ch.totalLostBefore} 次`">歪 {{ ch.totalLostBefore }}</span>
+              <span v-if="ch.isStandard" class="text-gray-400 text-xs">常駐</span>
+              <span v-if="ch.isCollab" class="bg-sky-100 text-sky-600 text-xs font-bold px-1 rounded leading-tight">聯動</span>
             </div>
-            <span class="text-gray-400 text-[10px] tabular-nums">{{ formatDate(ch.lastDate) }}</span>
+            <span class="text-gray-400 text-xs tabular-nums">{{ formatDate(ch.lastDate) }}</span>
           </div>
         </div>
       </div>
@@ -62,32 +63,33 @@
     <!-- 光錐 -->
     <div v-if="filteredCones.length">
       <div class="flex items-center gap-2 mb-2">
-        <span class="text-sm font-medium text-gray-600">光錐</span>
-        <span class="text-gray-400 text-xs">({{ filteredCones.length }})</span>
+        <span class="text-base font-medium text-gray-600">光錐</span>
+        <span class="text-gray-400 text-sm">({{ filteredCones.length }})</span>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2">
         <div v-for="co of filteredCones" :key="co.name"
              :class="co.isStandard ? 'bg-gray-50' : 'bg-white'"
              :title="cardTitle(co)"
              class="border border-gray-200 rounded-lg p-2.5 cursor-help transition-shadow hover:shadow-md">
           <div class="flex items-center justify-between gap-1">
-            <span class="font-semibold text-gray-800 text-sm truncate" :title="co.name">{{ co.name }}</span>
-            <span :class="superimpositionClass(co.superimposition)" class="text-[11px] font-bold px-1.5 py-0.5 rounded leading-none flex-shrink-0">
+            <span class="font-semibold text-gray-800 text-base truncate" :title="co.name">{{ co.name }}</span>
+            <span :class="superimpositionClass(co.superimposition)" class="text-[13px] font-bold px-1.5 py-0.5 rounded leading-none flex-shrink-0">
               S{{ co.superimposition }}<span v-if="co.overflow" class="opacity-70">+{{ co.overflow }}</span>
             </span>
           </div>
           <div class="flex items-baseline gap-1 mt-1.5">
-            <span :class="costColor(co.avgActualCost)" class="text-base font-bold tabular-nums">{{ co.totalActualCost }}</span>
-            <span class="text-gray-400 text-[10px]">抽</span>
-            <span v-if="co.count > 1" class="text-gray-400 text-[10px] ml-1">(均 {{ co.avgActualCost }})</span>
+            <span :class="costColor(co.avgActualCost)" class="text-lg font-bold tabular-nums">{{ co.totalActualCost }}</span>
+            <span class="text-gray-400 text-xs">抽</span>
+            <span v-if="co.count > 1" class="text-gray-400 text-xs ml-1">(均 {{ co.avgActualCost }})</span>
           </div>
           <div class="flex items-center justify-between mt-0.5">
             <div class="flex items-center gap-1.5">
-              <span class="text-gray-500 text-[11px]">×{{ co.count }}</span>
-              <span v-if="co.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-[10px] font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${co.totalLostBefore} 次`">歪 {{ co.totalLostBefore }}</span>
-              <span v-if="co.isStandard" class="text-gray-400 text-[10px]">常駐</span>
+              <span class="text-gray-500 text-[13px]">×{{ co.count }}</span>
+              <span v-if="co.totalLostBefore > 0" class="bg-rose-100 text-rose-600 text-xs font-bold px-1 rounded leading-tight" :title="`為了拿他歪了 ${co.totalLostBefore} 次`">歪 {{ co.totalLostBefore }}</span>
+              <span v-if="co.isStandard" class="text-gray-400 text-xs">常駐</span>
+              <span v-if="co.isCollab" class="bg-sky-100 text-sky-600 text-xs font-bold px-1 rounded leading-tight">聯動</span>
             </div>
-            <span class="text-gray-400 text-[10px] tabular-nums">{{ formatDate(co.lastDate) }}</span>
+            <span class="text-gray-400 text-xs tabular-nums">{{ formatDate(co.lastDate) }}</span>
           </div>
         </div>
       </div>
@@ -98,7 +100,7 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import { isWeapon } from '../utils'
-import { STANDARD_5STAR, EVENT_BANNER_KEYS } from '../constants'
+import { STANDARD_5STAR, EVENT_BANNER_KEYS, COLLAB_BANNER_KEYS } from '../constants'
 
 const filters = reactive({
   search: '',
@@ -227,6 +229,7 @@ const aggregated = computed(() => {
     entry.lastDate = entry.pulls[entry.pulls.length - 1].time
     entry.banners = [...new Set(entry.pulls.map(p => p.bannerKey))]
     entry.isStandard = STANDARD_5STAR.has(entry.itemId)
+    entry.isCollab = !entry.isStandard && entry.banners.some(k => COLLAB_BANNER_KEYS.has(k))
     entry.avgActualCost = Math.round(entry.totalActualCost / entry.count)
 
     if (isWeapon(entry.itemType)) {
