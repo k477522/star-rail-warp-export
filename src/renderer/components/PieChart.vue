@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref, onMounted, onUpdated } from "vue";
+import { reactive, computed, ref, onMounted, onUpdated, onUnmounted } from "vue";
 import { use, init } from "echarts/core";
 import {
   TitleComponent,
@@ -132,8 +132,17 @@ onUpdated(() => {
   updateChart();
 });
 
+// 監聽容器本身的大小：頁籤切回來（從隱藏變顯示）時也會重畫，避免量到 0 寬度變空白
+let observer = null;
 onMounted(() => {
   updateChart();
-  window.addEventListener("resize", updateChart);
+  observer = new ResizeObserver(() => pieChart?.resize());
+  observer.observe(chart.value);
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+  pieChart?.dispose();
+  pieChart = null;
 });
 </script>

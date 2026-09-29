@@ -151,7 +151,7 @@ const tierBar = {
 
 const isWeaponItem = (item) => isWeapon(item[5])
 
-const isOff = (item) => isOffBanner(item[3], item[4])
+const isOff = (item) => isOffBanner(item[3], item[4], item[2])
 
 // 歪了一律用硬保底的顏色
 const rowTier = (item) => isOff(item) ? 'hard' : pityTier(item[1], item[3])

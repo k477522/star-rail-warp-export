@@ -176,15 +176,17 @@ const render = () => {
   chart.resize()
 }
 
-const onResize = () => chart?.resize()
+// 監聽容器本身的大小：頁籤切回來（從隱藏變顯示）時也會重畫
+let observer = null
 
 onMounted(() => {
   nextTick(render)
-  window.addEventListener('resize', onResize)
+  observer = new ResizeObserver(() => chart?.resize())
+  if (chartEl.value) observer.observe(chartEl.value)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', onResize)
+  observer?.disconnect()
   chart?.dispose()
   chart = null
 })

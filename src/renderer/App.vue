@@ -90,6 +90,9 @@
       <el-tab-pane label="5★ 收藏" name="collection" lazy>
         <character-list :detail="detail" :typeMap="typeMap" :coneOwners="coneOwners"></character-list>
       </el-tab-pane>
+      <el-tab-pane label="常數設定" name="constants" lazy>
+        <constants-setting :lang="state.config.lang"></constants-setting>
+      </el-tab-pane>
     </el-tabs>
     <Setting v-show="state.showSetting" :i18n="state.i18n" :gacha-data-info="dataInfo" @refreshData="readData()" @changeLang="getI18nData()" @close="showSetting(false)"></Setting>
 
@@ -128,8 +131,10 @@ import Setting from './components/Setting.vue'
 import LuckStats from './components/LuckStats.vue'
 import CharacterList from './components/CharacterList.vue'
 import TimelineChart from './components/TimelineChart.vue'
+import ConstantsSetting from './components/ConstantsSetting.vue'
 import gachaDetail from './gachaDetail'
 import { buildConeOwners } from './coneOwner'
+import { loadGameConstants } from './gameConstants'
 import { version } from '../../package.json'
 import gachaType from '../gachaType.json'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -406,6 +411,7 @@ const copyUrl = async () => {
 }
 
 onMounted(async () => {
+  await loadGameConstants()
   await readData()
   await getI18nData()
 

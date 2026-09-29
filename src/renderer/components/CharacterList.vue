@@ -100,7 +100,8 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import { isWeapon } from '../utils'
-import { STANDARD_5STAR, EVENT_BANNER_KEYS, COLLAB_BANNER_KEYS } from '../constants'
+import { EVENT_BANNER_KEYS, COLLAB_BANNER_KEYS } from '../constants'
+import { isStandardAt, isStandardItem } from '../gameConstants'
 
 const filters = reactive({
   search: '',
@@ -174,7 +175,7 @@ const attributePulls = (detail) => {
     let lostStreak = 0   // 累計歪次數
     for (const item of sorted) {
       const [rawName, pity, time, , itemId, itemType] = item
-      const isStd = STANDARD_5STAR.has(itemId)
+      const isStd = isStandardAt(itemId, time)
       if (isEvent && isStd) {
         // 歪了：這筆是常駐角色/光錐，pity 累積到下一筆
         attributions.push({
@@ -235,7 +236,7 @@ const aggregated = computed(() => {
     entry.firstDate = entry.pulls[0].time
     entry.lastDate = entry.pulls[entry.pulls.length - 1].time
     entry.banners = [...new Set(entry.pulls.map(p => p.bannerKey))]
-    entry.isStandard = STANDARD_5STAR.has(entry.itemId)
+    entry.isStandard = isStandardItem(entry.itemId)
     entry.isCollab = !entry.isStandard && entry.banners.some(k => COLLAB_BANNER_KEYS.has(k))
     entry.avgActualCost = Math.round(entry.totalActualCost / entry.count)
 

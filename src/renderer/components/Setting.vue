@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white py-4 px-6 w-screen h-screen fixed inset-0 overflow-y-auto">
+  <div class="bg-white py-4 px-6 w-screen h-screen fixed inset-0 z-[100] overflow-y-auto">
     <div class="flex content-center items-center mb-4 justify-between">
       <h3 class="text-xl">{{text.title}}</h3>
       <el-button icon="close" @click="closeSetting" plain circle type="default" class="w-8 h-8 shadow-md focus:shadow-none focus:outline-none fixed top-4 right-6"></el-button>

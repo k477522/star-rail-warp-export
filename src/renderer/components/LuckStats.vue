@@ -188,7 +188,7 @@
     <!-- 極值紀錄 -->
     <div v-if="extremes" class="border-t border-gray-200 pt-4 mt-4">
       <p class="text-gray-500 text-sm mb-2">極值紀錄</p>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-5 gap-2">
         <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
           <div class="text-emerald-600 text-[13px]">🎉 最歐 5★</div>
           <div class="flex items-baseline gap-1 mt-1">
@@ -213,14 +213,31 @@
           </div>
           <div class="text-gray-500 text-[13px] truncate">{{ extremes.currentStreak.poolName }}</div>
         </div>
+        <div class="bg-sky-50 border border-sky-200 rounded-lg p-2.5 cursor-help" :title="extremes.winStreak.names">
+          <div class="text-sky-600 text-[13px]">🍀 最長連續不歪</div>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-2xl font-bold text-sky-700 tabular-nums">{{ extremes.winStreak.count }}</span>
+            <span class="text-gray-400 text-xs">次</span>
+          </div>
+          <div class="text-gray-500 text-[13px] truncate">{{ extremes.winStreak.range }}</div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-2.5 cursor-help" :title="extremes.loseStreak.names">
+          <div class="text-red-600 text-[13px]">💔 最長連續歪</div>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-2xl font-bold text-red-700 tabular-nums">{{ extremes.loseStreak.count }}</span>
+            <span class="text-gray-400 text-xs">次</span>
+          </div>
+          <div class="text-gray-500 text-[13px] truncate">{{ extremes.loseStreak.range }}</div>
+        </div>
       </div>
+      <p class="text-gray-400 text-xs mt-2">連續歪／不歪只算限定池的 50/50；歪了之後的大保底必中，不列入計算。滑鼠移到格子上可看是哪幾隻。</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { STANDARD_5STAR } from '../constants'
+import { isStandardAt } from '../gameConstants'
 
 const props = defineProps({
   detail: Map,
@@ -296,7 +313,7 @@ const fiftyStats = computed(() => {
       const itemId = item[4]
       if (guaranteed) { guaranteed = false; continue }
       fifty++
-      if (STANDARD_5STAR.has(itemId)) { lost++; guaranteed = true }
+      if (isStandardAt(itemId, item[2])) { lost++; guaranteed = true }
       else won++
     }
     if (!fifty) continue
@@ -424,7 +441,49 @@ const extremes = computed(() => {
     }
   }
 
-  return { luckiest, worst, currentStreak }
+  return { luckiest, worst, currentStreak, ...fiftyStreaks.value }
+})
+
+// 50/50 連續紀錄：限定池依時間排序，每個池各自追蹤大保底；大保底必中那隻不算 50/50
+const fiftyStreaks = computed(() => {
+  const all = []
+  for (const key of ['11', '21', '12', '22']) {
+    for (const item of props.detail?.get(key)?.ssrPos || []) all.push(item)
+  }
+  all.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime())
+
+  const guaranteed = new Map()
+  const outcomes = []
+  for (const item of all) {
+    const [name, , time, poolKey, itemId] = item
+    if (guaranteed.get(poolKey)) { guaranteed.set(poolKey, false); continue }
+    const lost = isStandardAt(itemId, time)
+    if (lost) guaranteed.set(poolKey, true)
+    outcomes.push({ lost, name: (name || '').replace(/<[^>]+>/g, ''), time })
+  }
+
+  // 找最長連續段；同長度取較近期的
+  const longest = (wantLost) => {
+    let best = [], run = []
+    for (const o of outcomes) {
+      if (o.lost === wantLost) {
+        run.push(o)
+        if (run.length >= best.length) best = [...run]
+      } else {
+        run = []
+      }
+    }
+    if (!best.length) return { count: 0, range: '—', names: '' }
+    const day = (t) => new Date(t).toLocaleDateString()
+    const first = day(best[0].time), last = day(best[best.length - 1].time)
+    return {
+      count: best.length,
+      range: first === last ? first : `${first} – ${last}`,
+      names: best.map(o => o.name).join('、')
+    }
+  }
+
+  return { loseStreak: longest(true), winStreak: longest(false) }
 })
 
 const formatNum = (n) => n.toLocaleString('zh-TW')
@@ -462,7 +521,7 @@ const trendData = computed(() => {
     if (g) {
       poolGuaranteed.set(poolKey, false)
     } else {
-      if (STANDARD_5STAR.has(itemId)) {
+      if (isStandardAt(itemId, item[2])) {
         cumLost++
         poolGuaranteed.set(poolKey, true)
       }
@@ -486,7 +545,7 @@ const trendData = computed(() => {
     const g = rPoolG.get(it[3]) || false
     rPity += it[1]
     if (g) { rPoolG.set(it[3], false); continue }
-    if (STANDARD_5STAR.has(it[4])) { rLost++; rPoolG.set(it[3], true) }
+    if (isStandardAt(it[4], it[2])) { rLost++; rPoolG.set(it[3], true) }
   }
   const recentLimited = recentN - rLost
   const recentEff = recentLimited > 0 ? Math.round(rPity / recentLimited * 10) / 10 : null
