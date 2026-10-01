@@ -4,14 +4,38 @@
       <h3 class="text-lg font-semibold text-violet-700 flex items-center gap-1.5">
         <span>📈</span>抽卡節奏
       </h3>
-      <span class="text-gray-400 text-sm">每月抽數（柱）vs 每月 5★ 數（點）</span>
+      <span class="text-gray-400 text-sm">上：每月抽數　下：每月 5★ 數</span>
     </div>
     <div class="flex items-center gap-4 mb-2 text-sm text-gray-500">
       <span>計入：限定</span>
       <el-checkbox v-model="include.collab">連動</el-checkbox>
       <el-checkbox v-model="include.standard">常駐（含新手）</el-checkbox>
     </div>
-    <div ref="chartEl" class="w-full h-56 xl:h-96"></div>
+    <!-- 總花費：跟著上面的卡池勾選 -->
+    <div class="grid grid-cols-4 gap-2 mb-3">
+      <div class="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
+        <div class="text-gray-500 text-sm">總抽數</div>
+        <div class="text-2xl font-bold text-gray-800 tabular-nums">{{ formatNum(spending.pulls) }}</div>
+        <div class="text-gray-400 text-xs">抽</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
+        <div class="text-gray-500 text-sm">等值星瓊</div>
+        <div class="text-2xl font-bold text-violet-600 tabular-nums">{{ formatNum(spending.jade) }}</div>
+        <div class="text-gray-400 text-xs">每抽 {{ JADE_PER_PULL }} 星瓊</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-2.5 text-center cursor-help"
+           :title="`以最大面額 ${SHARD_PACK} 古老夢華 = NT$${formatNum(PACK_TWD)} 換算（每抽約 NT$${perPullTwd}），未計首儲雙倍與月卡`">
+        <div class="text-gray-500 text-sm">約合台幣</div>
+        <div class="text-2xl font-bold text-orange-500 tabular-nums">NT$ {{ formatNum(spending.twd) }}</div>
+        <div class="text-gray-400 text-xs">含免費取得的抽數</div>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-2.5 text-center">
+        <div class="text-gray-500 text-sm">每月平均</div>
+        <div class="text-2xl font-bold text-gray-800 tabular-nums">{{ formatNum(spending.perMonth) }}</div>
+        <div class="text-gray-400 text-xs">抽 / 月（{{ spending.months }} 個月）</div>
+      </div>
+    </div>
+    <div ref="chartEl" class="w-full h-72 xl:h-[28rem]"></div>
     <p class="text-gray-400 text-[13px] mt-2 leading-relaxed">
       月份依抽卡時間（本地時區）分桶。
       <span v-if="peakMonth"> · 最高峰：<span class="text-gray-600 font-medium">{{ peakMonth.label }}</span> 抽了 {{ peakMonth.total }} 抽。</span>
@@ -87,6 +111,27 @@ const buckets = computed(() => {
 
 const hasData = computed(() => buckets.value.length >= 2)
 
+// 花費換算：1 抽 = 160 星瓊；台幣以最大面額 6480 古老夢華 = NT$3,290 計（1 古老夢華 = 1 星瓊）
+const JADE_PER_PULL = 160
+const SHARD_PACK = 6480
+const PACK_TWD = 3290
+const perPullTwd = Math.round(JADE_PER_PULL / SHARD_PACK * PACK_TWD)
+
+const formatNum = (n) => n.toLocaleString('zh-TW')
+
+const spending = computed(() => {
+  const pulls = buckets.value.reduce((a, b) => a + b.total, 0)
+  const jade = pulls * JADE_PER_PULL
+  const months = buckets.value.length || 1
+  return {
+    pulls,
+    jade,
+    twd: Math.round(jade / SHARD_PACK * PACK_TWD),
+    months,
+    perMonth: Math.round(pulls / months)
+  }
+})
+
 const peakMonth = computed(() => {
   if (!buckets.value.length) return null
   let max = buckets.value[0]
@@ -96,74 +141,72 @@ const peakMonth = computed(() => {
   return { label: max.key, total: max.total }
 })
 
+// 上下兩張小圖共用月份軸（不用雙 Y 軸）：上 = 每月抽數，下 = 每月 5★ 數
 const buildOption = () => {
   const xs = buckets.value.map(b => b.key)
   const totals = buckets.value.map(b => b.total)
   const ssrs = buckets.value.map(b => b.ssr)
+  const axisText = { fontSize: 12, color: '#9ca3af' }
+  const valueAxis = (gridIndex, name, splitNumber) => ({
+    type: 'value',
+    gridIndex,
+    name,
+    minInterval: 1,
+    splitNumber,
+    nameTextStyle: axisText,
+    axisLabel: axisText,
+    splitLine: { lineStyle: { color: '#f3f4f6' } }
+  })
+  const monthAxis = (gridIndex, showLabel) => ({
+    type: 'category',
+    gridIndex,
+    data: xs,
+    axisLabel: showLabel
+      ? { ...axisText, interval: 'auto', rotate: xs.length > 12 ? 30 : 0 }
+      : { show: false },
+    axisTick: { show: false },
+    axisLine: { lineStyle: { color: '#e5e7eb' } }
+  })
   return {
-    grid: { left: 40, right: 40, top: 32, bottom: 30 },
+    grid: [
+      { left: 48, right: 16, top: 28, height: '52%' },
+      { left: 48, right: 16, top: '70%', bottom: 36 }
+    ],
+    axisPointer: { link: [{ xAxisIndex: 'all' }] },
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
       formatter: (params) => {
-        const month = params[0].axisValue
-        const total = params.find(p => p.seriesName === '抽數')?.value ?? 0
-        const ssr = params.find(p => p.seriesName === '5★')?.value ?? 0
+        const i = params[0].dataIndex
+        const total = totals[i], ssr = ssrs[i]
         const rate = total > 0 ? ((ssr / total) * 100).toFixed(1) : '0.0'
-        return `${month}<br/>抽數: <b>${total}</b><br/>5★: <b>${ssr}</b> (${rate}%)`
+        return `${xs[i]}<br/>抽數: <b>${total}</b><br/>5★: <b>${ssr}</b> (${rate}%)`
       },
       padding: 6,
       textStyle: { fontSize: 14 }
     },
-    legend: {
-      data: ['抽數', '5★'],
-      top: 0,
-      right: 0,
-      textStyle: { fontSize: 13 },
-      itemGap: 12
-    },
-    xAxis: {
-      type: 'category',
-      data: xs,
-      axisLabel: { fontSize: 12, color: '#9ca3af', interval: 'auto', rotate: xs.length > 12 ? 30 : 0 },
-      axisLine: { lineStyle: { color: '#e5e7eb' } }
-    },
-    yAxis: [
-      {
-        type: 'value',
-        name: '抽數',
-        nameTextStyle: { fontSize: 12, color: '#9ca3af' },
-        axisLabel: { fontSize: 12, color: '#9ca3af' },
-        splitLine: { lineStyle: { color: '#f3f4f6' } }
-      },
-      {
-        type: 'value',
-        name: '5★',
-        nameTextStyle: { fontSize: 12, color: '#9ca3af' },
-        axisLabel: { fontSize: 12, color: '#9ca3af' },
-        splitLine: { show: false },
-        minInterval: 1
-      }
-    ],
+    xAxis: [monthAxis(0, false), monthAxis(1, true)],
+    yAxis: [valueAxis(0, '抽數', 4), valueAxis(1, '5★', 2)],
     series: [
       {
         name: '抽數',
         type: 'bar',
+        xAxisIndex: 0,
+        yAxisIndex: 0,
         data: totals,
-        itemStyle: { color: '#93c5fd', borderRadius: [3, 3, 0, 0] },
+        itemStyle: { color: '#93c5fd', borderRadius: [4, 4, 0, 0] },
         emphasis: { itemStyle: { color: '#3b82f6' } },
         barMaxWidth: 28
       },
       {
         name: '5★',
-        type: 'line',
+        type: 'bar',
+        xAxisIndex: 1,
         yAxisIndex: 1,
         data: ssrs,
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 6,
-        lineStyle: { color: '#f59e0b', width: 2 },
-        itemStyle: { color: '#f59e0b' }
+        itemStyle: { color: '#fbbf24', borderRadius: [4, 4, 0, 0] },
+        emphasis: { itemStyle: { color: '#f59e0b' } },
+        barMaxWidth: 28
       }
     ]
   }

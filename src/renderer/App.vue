@@ -84,12 +84,16 @@
       <!-- lazy：第一次切到該頁才渲染，避免圖表在隱藏狀態下量到 0 寬度 -->
       <el-tab-pane label="幸運度分析" name="luck" lazy>
         <luck-stats :detail="detail" :typeMap="typeMap"></luck-stats>
+        <pity-distribution :detail="detail"></pity-distribution>
       </el-tab-pane>
       <el-tab-pane label="抽卡節奏" name="timeline" lazy>
         <timeline-chart :gachaData="gachaData"></timeline-chart>
       </el-tab-pane>
       <el-tab-pane label="5★ 收藏" name="collection" lazy>
         <character-list :detail="detail" :typeMap="typeMap" :coneOwners="coneOwners"></character-list>
+      </el-tab-pane>
+      <el-tab-pane label="抽卡規劃" name="planner" lazy>
+        <pull-planner :detail="detail"></pull-planner>
       </el-tab-pane>
       <el-tab-pane label="常數設定" name="constants" lazy>
         <constants-setting :lang="state.config.lang"></constants-setting>
@@ -133,6 +137,8 @@ import LuckStats from './components/LuckStats.vue'
 import CharacterList from './components/CharacterList.vue'
 import TimelineChart from './components/TimelineChart.vue'
 import ConstantsSetting from './components/ConstantsSetting.vue'
+import PityDistribution from './components/PityDistribution.vue'
+import PullPlanner from './components/PullPlanner.vue'
 import gachaDetail from './gachaDetail'
 import { buildConeOwners } from './coneOwner'
 import { loadGameConstants } from './gameConstants'

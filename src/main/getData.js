@@ -46,8 +46,9 @@ const findDataFiles = async (dataPath, fileMap) => {
   const files = await readdir(dataPath)
   if (files?.length) {
     for (let name of files) {
-      if (/^gacha-list-\d+\.json$/.test(name) && !fileMap.has(name)) {
-        fileMap.set(name, dataPath)
+      if (/^gacha-list-\d+\.json$/.test(name)) {
+        if (!fileMap.has(name)) fileMap.set(name, [])
+        fileMap.get(name).push(dataPath)
       }
     }
   }
@@ -70,7 +71,9 @@ const readData = async () => {
   if (localDataReaded) return
   localDataReaded = true
   const fileMap = await collectDataFiles()
-  for (let [name, dataPath] of fileMap) {
+  // 同一個 UID 在外部資料夾和本機都有檔案時，取資料時間（time）較新的那份
+  const entries = [...fileMap].flatMap(([name, paths]) => paths.map(dataPath => [name, dataPath]))
+  for (let [name, dataPath] of entries) {
     try {
       const data = await readJSON(dataPath, name)
       data.typeMap = new Map(data.typeMap) || defaultTypeMap
@@ -83,7 +86,10 @@ const readData = async () => {
         });
       });
       if (data.uid) {
-        dataMap.set(data.uid, data)
+        const existing = dataMap.get(data.uid)
+        if (!existing || (data.time || 0) > (existing.time || 0)) {
+          dataMap.set(data.uid, data)
+        }
       }
     } catch (e) {
       sendMsg(e, 'ERROR')

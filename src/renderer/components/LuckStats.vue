@@ -78,6 +78,11 @@
       <div class="space-y-2">
         <div v-for="pool of poolList" :key="pool.key" class="flex items-center gap-3 text-sm">
           <span class="text-gray-600 w-24 text-right flex-shrink-0 truncate">{{ pool.name }}</span>
+          <span class="w-20 flex-shrink-0 text-center">
+            <span v-if="pool.guarantee" :title="pool.guarantee.tip"
+                  :class="pool.guarantee.guaranteed ? 'bg-amber-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'"
+                  class="inline-block text-xs font-bold px-1.5 py-0.5 rounded leading-tight cursor-help">{{ pool.guarantee.label }}</span>
+          </span>
           <div class="flex-1 bg-gray-100 rounded-full h-3 relative overflow-hidden">
             <div
               :class="barColor(pool.pity, pool.hardPity)"
@@ -238,6 +243,7 @@
 <script setup>
 import { computed } from 'vue'
 import { isStandardAt } from '../gameConstants'
+import { pityModel, probAt } from '../pityModel'
 
 const props = defineProps({
   detail: Map,
@@ -598,20 +604,6 @@ const rateArrow = (rate, expected) => {
   return ''
 }
 
-// 軟保底機率模型：未進軟保底前 base rate；進軟保底後線性上升到硬保底時 100%
-const pityModel = (key) => {
-  if (key === '12' || key === '22') return { hard: 80, soft: 65, base: 0.008 }
-  if (key === '2') return { hard: 50, soft: 40, base: 0.006 }
-  return { hard: 90, soft: 74, base: 0.006 }
-}
-
-const probAt = (pullNum, key) => {
-  const { hard, soft, base } = pityModel(key)
-  if (pullNum >= hard) return 1
-  if (pullNum < soft) return base
-  return base + ((pullNum - soft) / (hard - soft)) * (1 - base)
-}
-
 // E[剩餘抽數] | 當前 pity = p
 const expectedRemaining = (currentPity, key) => {
   const { hard } = pityModel(key)
@@ -625,15 +617,26 @@ const expectedRemaining = (currentPity, key) => {
   return Math.max(1, Math.round(expected * 10) / 10)
 }
 
+// 大保底狀態：限定池最後一隻 5★ 是歪的，下一隻必中限定；常駐池沒有 50/50
+const guaranteeOf = (key, d) => {
+  if (!['11', '12', '21', '22'].includes(key)) return null
+  const last = d.ssrPos[d.ssrPos.length - 1]
+  if (last && isStandardAt(last[4], last[2])) return { guaranteed: true, label: '大保底', tip: '上一隻歪了，下一隻 5★ 必定是限定' }
+  const rate = (key === '12' || key === '22') ? '75%' : '50%'
+  return { guaranteed: false, label: `小保底 ${rate}`, tip: `下一隻 5★ 有 ${rate} 機率是限定` }
+}
+
 const poolList = computed(() => {
   if (!props.detail) return []
   return ['11', '12', '1', '21', '22']
     .filter(key => props.detail.has(key))
     .map(key => {
       const model = pityModel(key)
-      const pity = props.detail.get(key).countMio
+      const d = props.detail.get(key)
+      const pity = d.countMio
       return {
         key,
+        guarantee: guaranteeOf(key, d),
         name: props.typeMap?.get(key) || key,
         pity,
         hardPity: model.hard,
