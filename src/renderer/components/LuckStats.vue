@@ -48,17 +48,22 @@
         <div class="flex items-baseline justify-between mb-2">
           <span class="text-gray-500 text-sm">{{ s.name }}</span>
           <span :class="winRateColor(s.winRate, s.expected)" class="text-2xl font-bold">
+            <span class="text-xs font-normal text-gray-400 mr-1">50/50 勝率</span>
             {{ (s.winRate * 100).toFixed(1) }}%
             <span class="text-sm font-normal">{{ rateArrow(s.winRate, s.expected) }}</span>
           </span>
         </div>
-        <div class="grid grid-cols-3 text-[13px] gap-1">
-          <div class="text-center">
-            <div class="text-gray-400">中限定</div>
+        <div class="grid grid-cols-4 text-[13px] gap-1">
+          <div class="text-center" :title="`50/50 贏的 ${s.won} 隻 + 大保底 ${s.limited - s.won} 隻`">
+            <div class="text-gray-400">限定到手</div>
+            <div class="font-bold text-gray-700">{{ s.limited }} 隻</div>
+          </div>
+          <div class="text-center border-l border-gray-100" title="歪了之後的大保底必中，不算 50/50">
+            <div class="text-gray-400">50/50 勝 / 次</div>
             <div class="font-bold text-gray-700">{{ s.won }} / {{ s.fifty }}</div>
           </div>
           <div class="text-center border-x border-gray-100">
-            <div class="text-gray-400">期望</div>
+            <div class="text-gray-400">期望勝率</div>
             <div class="font-bold text-gray-500">{{ (s.expected * 100).toFixed(0) }}%</div>
           </div>
           <div class="text-center">
@@ -330,7 +335,7 @@ const fiftyStats = computed(() => {
     result.push({
       key,
       name: props.typeMap?.get(key) || key,
-      won, lost, fifty, winRate, expected, effectiveAvg
+      won, lost, fifty, winRate, expected, effectiveAvg, limited: limitedTotal
     })
   }
   return result
