@@ -1,4 +1,4 @@
-// 產生測試用抽卡資料，輸出到 dist/userData/gacha-list-100000001.json（yarn dev 讀取的資料夾）
+// 產生測試用抽卡資料，輸出到 userData/gacha-list-100000001.json（yarn dev 與安裝版都讀 userData）
 const fs = require('fs')
 const path = require('path')
 
@@ -108,7 +108,7 @@ const data = {
   region_time_zone: 8
 }
 
-const outPath = path.resolve(__dirname, '../dist/userData/gacha-list-100000001.json')
+const outPath = path.resolve(__dirname, '../userData/gacha-list-100000001.json')
 fs.mkdirSync(path.dirname(outPath), { recursive: true })
 fs.writeFileSync(outPath, JSON.stringify(data, null, 2), 'utf8')
 console.log('產生完成：', outPath)

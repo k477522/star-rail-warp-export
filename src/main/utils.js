@@ -11,7 +11,9 @@ const { glob } = require('glob')
 const isDev = !app.isPackaged
 
 const userPath = app.getPath('userData')
-const appRoot = isDev ? path.resolve(__dirname, '..', '..') : path.resolve(app.getAppPath(), '..', '..')
+// 開發模式：main 編譯在 dist/electron/main，往上三層是專案根目錄（資料放 <專案>/userData）
+// 安裝版：exe 所在資料夾（資料放 exe 旁邊的 userData）
+const appRoot = isDev ? path.resolve(__dirname, '..', '..', '..') : path.resolve(app.getAppPath(), '..', '..')
 const userDataPath = path.resolve(appRoot, 'userData')
 // const globalUserDataPath = path.resolve(userPath, 'userData')
 
